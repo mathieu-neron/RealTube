@@ -17,6 +17,7 @@ type Handlers struct {
 	Stats   *handler.StatsHandler
 	Sync    *handler.SyncHandler
 	Health  *handler.HealthHandler
+	Export  *handler.ExportHandler
 }
 
 // Setup configures the middleware stack and all API routes on the given Fiber app.
@@ -60,4 +61,8 @@ func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	// Sync routes — 2 req/min per user
 	api.Get("/sync/delta", syncRL.Handler(), h.Sync.DeltaSync)
 	api.Get("/sync/full", syncRL.Handler(), h.Sync.FullSync)
+
+	// Database export — 1 req/hour per IP (NGINX also rate-limits this)
+	exportRL := middleware.NewExportRateLimiter()
+	api.Get("/database/export", exportRL.Handler(), h.Export.Export)
 }

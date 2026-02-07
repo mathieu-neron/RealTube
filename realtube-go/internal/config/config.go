@@ -9,6 +9,7 @@ type Config struct {
 	LogLevel    string
 	Environment string
 	CORSOrigins string
+	ExportDir   string
 }
 
 func Load() *Config {
@@ -19,6 +20,7 @@ func Load() *Config {
 		LogLevel:    getEnv("LOG_LEVEL", "info"),
 		Environment: getEnv("ENVIRONMENT", "development"),
 		CORSOrigins: getEnv("CORS_ORIGINS", "*"),
+		ExportDir:   getEnv("EXPORT_DIR", "/exports"),
 	}
 }
 

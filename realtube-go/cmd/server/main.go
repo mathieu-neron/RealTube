@@ -53,6 +53,7 @@ func main() {
 		Stats:   handler.NewStatsHandler(userSvc),
 		Sync:    handler.NewSyncHandler(syncSvc),
 		Health:  handler.NewHealthHandler(pool, cacheSvc.Client()),
+		Export:  handler.NewExportHandler(cfg.ExportDir),
 	}
 
 	app := fiber.New(fiber.Config{

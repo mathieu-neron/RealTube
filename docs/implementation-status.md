@@ -65,7 +65,7 @@ Last updated: 2026-02-07
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
 | 39 | API Contract Test Suite | done | 2026-02-07 | 7 test suites (health, videos, votes, channels/users/stats, sync, rate limits); curl+bash+python JSON assertions; run_tests.sh runner; 59 pass Go, 61 pass Python; fixed Go model NULL handling (nullable DB columns → *string pointers) |
-| 40 | Database Export Service | pending | | |
+| 40 | Database Export Service | done | 2026-02-07 | scripts/db-export.sh (privacy-filtered: excludes ip_hashes/vip_actions data, NULLs ip_hash in votes, zeros shadowban in users); Go export.go + Python export.py serve latest .sql.gz; db-exporter uses script; both backends verified (HTTP 200, 3.3KB gzip) |
 | 41 | Channel Auto-Flag Background Job | pending | | |
 | 42 | Async Score Recalculation Worker | pending | | |
 | 43 | Security Hardening - Input Validation | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 39
+- **Completed:** 40
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 9
+- **Pending:** 8

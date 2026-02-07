@@ -65,8 +65,11 @@ services:
       - LOG_LEVEL=info
       - ENVIRONMENT=development
       - CORS_ORIGINS=*
+      - EXPORT_DIR=/exports
     ports:
       - "8080:8080"
+    volumes:
+      - ./exports:/exports:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,8 +93,11 @@ services:
       - LOG_LEVEL=info
       - ENVIRONMENT=development
       - CORS_ORIGINS=*
+      - EXPORT_DIR=/exports
     ports:
       - "8081:8081"
+    volumes:
+      - ./exports:/exports:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -113,9 +119,10 @@ services:
       PGDATABASE: realtube
     volumes:
       - ./exports:/exports
+      - ./scripts/db-export.sh:/db-export.sh:ro
     entrypoint: >
       sh -c "while true; do
-        pg_dump -Fc realtube > /exports/realtube-$$(date +%Y%m%d).dump;
+        sh /db-export.sh /exports;
         sleep 86400;
       done"
     depends_on:

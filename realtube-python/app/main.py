@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from app.config import settings
 from app.db.database import create_pool
 from app.middleware.ratelimit import RateLimitMiddleware, configure_rate_limiters
-from app.routers import channels, health, stats, sync, users, videos, votes
+from app.routers import channels, export, health, stats, sync, users, videos, votes
 from app.services.cache_service import create_cache_service
 
 logging.basicConfig(level=settings.log_level.upper())
@@ -38,6 +38,7 @@ app.include_router(channels.router)
 app.include_router(users.router)
 app.include_router(stats.router)
 app.include_router(sync.router)
+app.include_router(export.router)
 
 
 if __name__ == "__main__":
