@@ -58,7 +58,7 @@ Last updated: 2026-02-07
 | 35 | Extension - Content Script (Video Detection & Hiding) | done | 2026-02-07 | dom-utils.ts: page type detection (6 types), video ID extraction from 5 renderer types + URL parsing. hide.ts: cache-first check via CHECK_VIDEOS message, threshold-based hiding with display:none. content.ts: init + MutationObserver (debounced 100ms) + SPA navigation (yt-navigate-finish) + settings listener |
 | 36 | Extension - Vote Submission UI | done | 2026-02-07 | vote-ui.ts + vote-ui.css; "Flag AI" button injected into #top-level-buttons-computed; overlay with 5 categories, custom radio animations, submit/cancel/click-outside-close; success/error feedback with auto-close; content.ts updated to inject on watch pages and remove on navigation; CSS extracted to content.css (5.91 KiB) |
 | 37 | Extension - Popup UI (React) | done | 2026-02-07 | popup.tsx (React 19) + popup.css; 5 sections: StatusBar (toggle+connection dot), CurrentVideoInfo (score ring+category bars), QuickVote (5 category buttons), UserStats (trust/votes/accuracy cards), CacheInfo (counts+sync button); parallel data fetch on mount; popup.js 195 KiB, popup.css 11.2 KiB |
-| 38 | Extension - Options Page (React) | pending | | |
+| 38 | Extension - Options Page (React) | done | 2026-02-07 | options.tsx (React 19) + options.css; 6 sections: General (toggle+action select), Categories (global+5 per-category threshold sliders with teal fill), Appearance (badge style+notifications), Privacy (hash-prefix info block), Advanced (server URL, cache TTL, debug toggle), About (version/userId/trust+links); debounced save with toast notification; options.js 200 KiB, options.css 10.6 KiB |
 
 ## Phase 5: Hardening & Public API
 
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 37
+- **Completed:** 38
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 11
+- **Pending:** 10
