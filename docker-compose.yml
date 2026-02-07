@@ -3,15 +3,43 @@
 # See docs/design/infrastructure-design.md for the full target configuration.
 #
 # Planned services:
-#   postgres        (Step 5)  - PostgreSQL 16
-#   redis           (Step 5)  - Redis 7
 #   go-backend      (Step 30) - Go/Fiber primary API
 #   python-backend  (Step 30) - Python/FastAPI secondary API
 #   nginx           (Step 31) - Reverse proxy
 #   db-exporter     (Step 40) - Daily pg_dump
 
-services: {}
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: realtube
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: realtube
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realtube"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-# volumes:
-#   postgres_data:
-#   redis_data:
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly no
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
