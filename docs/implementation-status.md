@@ -13,7 +13,7 @@ Last updated: 2026-02-06
 | 5 | Docker Compose - PostgreSQL & Redis | done | 2026-02-06 | Both healthy; 9 tables auto-created from initdb.d mount; Redis PONG |
 | 6 | Go Backend - Project Scaffold | done | 2026-02-06 | Fiber v3, Go 1.25.7; go build + docker build pass |
 | 7 | Python Backend - Project Scaffold | done | 2026-02-06 | FastAPI 0.128, uvicorn starts, docker build passes |
-| 8 | Go Backend - Database Connection Pool | pending | | |
+| 8 | Go Backend - Database Connection Pool | done | 2026-02-06 | pgx/v5 pool with retry; logs "database connected" |
 | 9 | Python Backend - Database Connection Pool | pending | | |
 
 ## Phase 2: Go Backend - Core API
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 7
+- **Completed:** 8
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 41
+- **Pending:** 40
