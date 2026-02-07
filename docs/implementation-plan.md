@@ -2,6 +2,8 @@
 
 ~40 small, independently testable steps grouped into 5 phases. Each step builds on previous steps but can be verified in isolation.
 
+> **Note:** For any step involving UI components or frontend interfaces, use the `/frontend-design` skill to generate high-quality, polished UI.
+
 ---
 
 ## Phase 1: Foundation (Database + Project Scaffolding)
@@ -264,8 +266,6 @@
 ---
 
 ## Phase 4: Infrastructure & Extension
-
-> **Note:** For all extension UI steps (32–38), use the `/frontend-design` skill to generate high-quality, polished UI components.
 
 ### Step 30: Docker Compose - Full Stack
 **Description:** Complete `docker-compose.yml` with Go backend, Python backend, and db-exporter services. All services start and connect.

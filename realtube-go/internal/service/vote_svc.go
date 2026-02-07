@@ -10,13 +10,12 @@ import (
 )
 
 type VoteService struct {
-	repo     *repository.VoteRepo
-	scoreSvc *ScoreService
-	cache    *CacheService
+	repo  *repository.VoteRepo
+	cache *CacheService
 }
 
-func NewVoteService(repo *repository.VoteRepo, scoreSvc *ScoreService, cache *CacheService) *VoteService {
-	return &VoteService{repo: repo, scoreSvc: scoreSvc, cache: cache}
+func NewVoteService(repo *repository.VoteRepo, cache *CacheService) *VoteService {
+	return &VoteService{repo: repo, cache: cache}
 }
 
 // Submit processes a vote submission request.
@@ -30,12 +29,8 @@ func (s *VoteService) Submit(ctx context.Context, req model.VoteRequest, ipHash 
 		return nil, err
 	}
 
-	// Recalculate video score after vote change
-	if err := s.scoreSvc.RecalculateVideoScore(ctx, req.VideoID); err != nil {
-		return nil, err
-	}
-
-	// Invalidate cache so next read gets fresh data
+	// Score recalculation is handled async by ScoreWorker via LISTEN/NOTIFY.
+	// Invalidate cache so next read re-fetches from DB.
 	if s.cache != nil {
 		if err := s.cache.InvalidateVideo(ctx, req.VideoID); err != nil {
 			log.Printf("cache: invalidate video error: %v", err)
@@ -60,11 +55,8 @@ func (s *VoteService) Delete(ctx context.Context, req model.VoteDeleteRequest) e
 		return err
 	}
 
-	if err := s.scoreSvc.RecalculateVideoScore(ctx, req.VideoID); err != nil {
-		return err
-	}
-
-	// Invalidate cache so next read gets fresh data
+	// Score recalculation is handled async by ScoreWorker via LISTEN/NOTIFY.
+	// Invalidate cache so next read re-fetches from DB.
 	if s.cache != nil {
 		if err := s.cache.InvalidateVideo(ctx, req.VideoID); err != nil {
 			log.Printf("cache: invalidate video error: %v", err)

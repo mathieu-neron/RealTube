@@ -9,7 +9,7 @@ from app.db.database import create_pool
 from app.middleware.ratelimit import RateLimitMiddleware, configure_rate_limiters
 from app.routers import channels, export, health, stats, sync, users, videos, votes
 from app.services.cache_service import create_cache_service
-from app.services import channel_worker
+from app.services import channel_worker, score_worker
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -22,14 +22,22 @@ async def lifespan(app: FastAPI):
     app.state.cache_service = await create_cache_service(settings.redis_url)
 
     # Start background workers
-    worker_task = asyncio.create_task(channel_worker.run(app.state.db_pool))
+    channel_task = asyncio.create_task(channel_worker.run(app.state.db_pool))
+    score_task = asyncio.create_task(
+        score_worker.run(app.state.db_pool, app.state.cache_service)
+    )
 
     yield
 
     # Shutdown
-    worker_task.cancel()
+    score_task.cancel()
+    channel_task.cancel()
     try:
-        await worker_task
+        await score_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await channel_task
     except asyncio.CancelledError:
         pass
 

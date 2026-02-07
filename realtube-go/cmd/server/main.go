@@ -39,7 +39,7 @@ func main() {
 	// Services
 	videoSvc := service.NewVideoService(videoRepo, cacheSvc)
 	scoreSvc := service.NewScoreService(pool)
-	voteSvc := service.NewVoteService(voteRepo, scoreSvc, cacheSvc)
+	voteSvc := service.NewVoteService(voteRepo, cacheSvc)
 	channelSvc := service.NewChannelService(channelRepo, cacheSvc)
 	userSvc := service.NewUserService(userRepo)
 	syncSvc := service.NewSyncService(pool, videoSvc, channelSvc)
@@ -70,6 +70,9 @@ func main() {
 	// Start background workers
 	channelWorker := service.NewChannelWorker(pool, 15*time.Minute)
 	go channelWorker.Start(shutdownCtx)
+
+	scoreWorker := service.NewScoreWorker(pool, scoreSvc, cacheSvc)
+	go scoreWorker.Start(shutdownCtx)
 
 	// Start server in a goroutine
 	go func() {

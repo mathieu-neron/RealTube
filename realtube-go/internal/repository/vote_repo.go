@@ -158,6 +158,12 @@ func (r *VoteRepo) DeleteVote(ctx context.Context, videoID, userID string) error
 		return err
 	}
 
+	// Manually notify score worker (DELETE trigger doesn't fire vote_inserted)
+	_, err = tx.Exec(ctx, `SELECT pg_notify('vote_changes', $1)`, videoID)
+	if err != nil {
+		return err
+	}
+
 	return tx.Commit(ctx)
 }
 

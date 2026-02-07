@@ -3,7 +3,6 @@ import logging
 import asyncpg
 
 from app.models.vote import VoteResponse
-from app.services.score_service import recalculate_video_score
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +95,8 @@ async def submit_vote(
                 video_id,
             )
 
-    # Recalculate video score after vote change
-    await recalculate_video_score(pool, video_id)
-
-    # Get updated score
+    # Score recalculation is handled async by ScoreWorker via LISTEN/NOTIFY.
+    # Get current score (may lag slightly until worker processes).
     score = await pool.fetchval(
         "SELECT score FROM videos WHERE video_id = $1", video_id
     )
@@ -141,7 +138,9 @@ async def delete_vote(pool: asyncpg.Pool, video_id: str, user_id: str) -> None:
                 category,
             )
 
-    # Recalculate video score after vote removal
-    await recalculate_video_score(pool, video_id)
+            # Manually notify score worker (DELETE trigger doesn't fire vote_inserted)
+            await conn.execute(
+                "SELECT pg_notify('vote_changes', $1)", video_id
+            )
 
 
