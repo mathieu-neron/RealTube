@@ -32,7 +32,7 @@ Last updated: 2026-02-06
 | 19 | Go Backend - Router & Middleware Stack | done | 2026-02-07 | router.go with /api group, CORS middleware (configurable origins), request logger, panic recovery; main.go refactored to use router.Setup() |
 | 20 | Go Backend - Rate Limiting Middleware | done | 2026-02-07 | 9/9 tests pass; in-memory fixed-window limiter; per-route configs matching api-contract §5.3; X-RateLimit-* headers; wired into router |
 | 21 | Go Backend - Redis Cache Service | done | 2026-02-07 | go-redis/v9; cache-aside on video+channel lookups; write-through invalidation on vote submit/delete; graceful degradation (nil client = no-ops); TTLs: video 5min, channel 15min |
-| 22 | Go Backend - Health Check Endpoints | pending | | |
+| 22 | Go Backend - Health Check Endpoints | done | 2026-02-07 | /health/live (liveness) + /health/ready (readiness with DB+Redis latency, uptime, version); 503 on degraded; replaces inline /health/live in router |
 | 23 | Go Backend - Graceful Shutdown | pending | | |
 
 ## Phase 3: Python Backend - Mirror API
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 21
+- **Completed:** 22
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 27
+- **Pending:** 26

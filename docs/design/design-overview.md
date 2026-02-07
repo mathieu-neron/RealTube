@@ -169,7 +169,7 @@ The Python backend's `app/ml/` module is designed for future expansion:
 ## 18. Verification & Testing Plan
 
 ### Extension Testing
-- Unit tests with Jest for utility functions and business logic
+- Unit tests with Vitest for utility functions and business logic
 - Integration tests using Puppeteer/Playwright for YouTube DOM manipulation
 - Manual testing across Chrome, Firefox, Safari, Edge
 - Test Shorts handling separately from regular videos

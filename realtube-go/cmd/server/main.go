@@ -50,6 +50,7 @@ func main() {
 		User:    handler.NewUserHandler(userSvc),
 		Stats:   handler.NewStatsHandler(userSvc),
 		Sync:    handler.NewSyncHandler(syncSvc),
+		Health:  handler.NewHealthHandler(pool, cacheSvc.Client()),
 	}
 
 	app := fiber.New(fiber.Config{

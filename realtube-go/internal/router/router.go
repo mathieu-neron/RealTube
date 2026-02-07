@@ -16,6 +16,7 @@ type Handlers struct {
 	User    *handler.UserHandler
 	Stats   *handler.StatsHandler
 	Sync    *handler.SyncHandler
+	Health  *handler.HealthHandler
 }
 
 // Setup configures the middleware stack and all API routes on the given Fiber app.
@@ -32,10 +33,9 @@ func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	syncRL := middleware.NewSyncRateLimiter()
 	statsRL := middleware.NewStatsRateLimiter()
 
-	// Health check (before API group, no rate limiting)
-	app.Get("/health/live", func(c fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
-	})
+	// Health check endpoints (no rate limiting)
+	app.Get("/health/live", h.Health.Live)
+	app.Get("/health/ready", h.Health.Ready)
 
 	// API routes
 	api := app.Group("/api")
