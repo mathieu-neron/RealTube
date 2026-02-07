@@ -9,6 +9,13 @@ import {
   PageType,
 } from "./dom-utils";
 import { checkAndHideVideos } from "./hide";
+import {
+  checkAndSkipCurrentShort,
+  createShortsObserver,
+  extractShortsVideoIds,
+  isShortsPage,
+  watchShortsNavigation,
+} from "./shorts";
 import { injectVoteButton, removeVoteButton } from "./vote-ui";
 
 const DEBOUNCE_MS = 100;
@@ -16,14 +23,26 @@ const INITIAL_SCAN_DELAY_MS = 500;
 
 let currentPageType: PageType = "unknown";
 let observer: MutationObserver | null = null;
+let shortsObserver: MutationObserver | null = null;
+let stopShortsNavWatch: (() => void) | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let enabled = true;
+let shortsFilterEnabled = true;
 
 /** Check extension enabled state from storage. */
 async function isEnabled(): Promise<boolean> {
   return new Promise((resolve) => {
     chrome.storage.sync.get("enabled", (result) => {
       resolve(result.enabled !== false); // default to enabled
+    });
+  });
+}
+
+/** Check Shorts filtering enabled state from storage. */
+async function isShortsFilteringEnabled(): Promise<boolean> {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get("shortsFilterEnabled", (result) => {
+      resolve(result.shortsFilterEnabled !== false); // default to enabled
     });
   });
 }
@@ -76,6 +95,51 @@ function stopObserver(): void {
   }
 }
 
+/** Start Shorts-specific observers and navigation watcher. */
+function startShortsMode(): void {
+  stopShortsMode();
+
+  // Check the current short immediately
+  checkAndSkipCurrentShort();
+
+  // Also scan for preloaded shorts renderers and hide flagged ones
+  const shortsMap = extractShortsVideoIds();
+  if (shortsMap.size > 0) {
+    checkAndHideVideos(shortsMap);
+  }
+
+  // Observe for new shorts renderers being loaded
+  const container =
+    document.querySelector("ytd-shorts") ||
+    document.querySelector("ytd-app") ||
+    document.body;
+
+  shortsObserver = createShortsObserver((newShorts) => {
+    checkAndHideVideos(newShorts);
+  });
+  shortsObserver.observe(container, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Watch for intra-shorts URL changes (scrolling between shorts)
+  stopShortsNavWatch = watchShortsNavigation(() => {
+    checkAndSkipCurrentShort();
+  });
+}
+
+/** Stop Shorts-specific observers. */
+function stopShortsMode(): void {
+  if (shortsObserver) {
+    shortsObserver.disconnect();
+    shortsObserver = null;
+  }
+  if (stopShortsNavWatch) {
+    stopShortsNavWatch();
+    stopShortsNavWatch = null;
+  }
+}
+
 /** Handle YouTube SPA navigation (URL changes without page reload). */
 function onNavigate(): void {
   currentPageType = detectPageType();
@@ -84,6 +148,13 @@ function onNavigate(): void {
   removeVoteButton();
   if (currentPageType === "watch") {
     setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
+  }
+
+  // Manage Shorts mode
+  if (currentPageType === "shorts" && shortsFilterEnabled) {
+    setTimeout(() => startShortsMode(), INITIAL_SCAN_DELAY_MS);
+  } else {
+    stopShortsMode();
   }
 
   // Re-scan after navigation with a small delay for DOM to settle
@@ -102,13 +173,30 @@ function setupNavigationListener(): void {
 /** Listen for settings changes. */
 function setupSettingsListener(): void {
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "sync" && changes.enabled !== undefined) {
+    if (area !== "sync") return;
+
+    if (changes.enabled !== undefined) {
       enabled = changes.enabled.newValue !== false;
       if (enabled) {
         scanVisibleVideos();
         startObserver();
+        if (currentPageType === "shorts" && shortsFilterEnabled) {
+          startShortsMode();
+        }
       } else {
         stopObserver();
+        stopShortsMode();
+      }
+    }
+
+    if (changes.shortsFilterEnabled !== undefined) {
+      shortsFilterEnabled = changes.shortsFilterEnabled.newValue !== false;
+      if (enabled && currentPageType === "shorts") {
+        if (shortsFilterEnabled) {
+          startShortsMode();
+        } else {
+          stopShortsMode();
+        }
       }
     }
   });
@@ -122,6 +210,7 @@ async function init(): Promise<void> {
     return;
   }
 
+  shortsFilterEnabled = await isShortsFilteringEnabled();
   currentPageType = detectPageType();
   console.log(`RealTube content script loaded (page: ${currentPageType})`);
 
@@ -134,6 +223,11 @@ async function init(): Promise<void> {
   // Inject vote button on watch pages
   if (currentPageType === "watch") {
     setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
+  }
+
+  // Start Shorts mode if on a Shorts page
+  if (currentPageType === "shorts" && shortsFilterEnabled) {
+    setTimeout(() => startShortsMode(), INITIAL_SCAN_DELAY_MS);
   }
 
   // Start observing for dynamically loaded content

@@ -74,7 +74,7 @@ Channel page:    ytd-grid-video-renderer
 ### 4.4 Options Page (`options.tsx` - React)
 
 **Settings Sections:**
-- **General** -- Enable/disable, default action (hide/warn/dim/ignore)
+- **General** -- Enable/disable, Shorts filtering toggle, default action (hide/warn/dim/ignore)
 - **Categories** -- Per-category thresholds (e.g., hide fully_ai at 60% confidence, warn ai_voiceover at 80%)
 - **Appearance** -- Badge style, notification preferences
 - **Privacy** -- Hash-prefix mode toggle, data collection info

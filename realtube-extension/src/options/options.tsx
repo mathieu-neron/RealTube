@@ -9,6 +9,7 @@ import "./options.css";
 
 interface Settings {
   enabled: boolean;
+  shortsFilterEnabled: boolean;
   defaultAction: "hide" | "warn" | "dim" | "ignore";
   hideThreshold: number;
   categoryThresholds: Record<string, number>;
@@ -29,6 +30,7 @@ interface UserInfo {
 
 const DEFAULT_SETTINGS: Settings = {
   enabled: true,
+  shortsFilterEnabled: true,
   defaultAction: "hide",
   hideThreshold: 50,
   categoryThresholds: {
@@ -68,6 +70,7 @@ async function loadSettings(): Promise<Settings> {
     chrome.storage.sync.get(null, (items) => {
       resolve({
         enabled: items.enabled !== undefined ? items.enabled : DEFAULT_SETTINGS.enabled,
+        shortsFilterEnabled: items.shortsFilterEnabled !== undefined ? items.shortsFilterEnabled : DEFAULT_SETTINGS.shortsFilterEnabled,
         defaultAction: items.defaultAction || DEFAULT_SETTINGS.defaultAction,
         hideThreshold: items.hideThreshold !== undefined ? items.hideThreshold : DEFAULT_SETTINGS.hideThreshold,
         categoryThresholds: {
@@ -308,6 +311,13 @@ function Options() {
                 <option value="dim">Dim</option>
                 <option value="ignore">Ignore</option>
               </select>
+            </div>
+            <div className="rt-opts-row">
+              <div className="rt-opts-row-info">
+                <div className="rt-opts-row-label">Filter Shorts</div>
+                <div className="rt-opts-row-desc">Automatically skip flagged AI videos in YouTube Shorts</div>
+              </div>
+              <Toggle checked={settings.shortsFilterEnabled} onChange={(v) => save({ shortsFilterEnabled: v })} />
             </div>
           </div>
         </div>
