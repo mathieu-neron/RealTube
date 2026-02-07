@@ -144,9 +144,9 @@ function stopShortsMode(): void {
 function onNavigate(): void {
   currentPageType = detectPageType();
 
-  // Manage vote button: inject on watch pages, remove elsewhere
+  // Manage vote button: inject on watch and shorts pages, remove elsewhere
   removeVoteButton();
-  if (currentPageType === "watch") {
+  if (currentPageType === "watch" || currentPageType === "shorts") {
     setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
   }
 
@@ -220,8 +220,8 @@ async function init(): Promise<void> {
   // Initial scan after a short delay for DOM to be ready
   setTimeout(() => scanVisibleVideos(), INITIAL_SCAN_DELAY_MS);
 
-  // Inject vote button on watch pages
-  if (currentPageType === "watch") {
+  // Inject vote button on watch and shorts pages
+  if (currentPageType === "watch" || currentPageType === "shorts") {
     setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
   }
 

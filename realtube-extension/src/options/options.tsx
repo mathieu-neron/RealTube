@@ -90,9 +90,10 @@ async function loadSettings(): Promise<Settings> {
 
 // ── SVG Icons ──
 
-const IconScan = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 7V2h5" /><path d="M22 7V2h-5" /><path d="M2 17v5h5" /><path d="M22 17v5h-5" /><circle cx="12" cy="12" r="4" />
+const IconEyeLogo = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+    <polygon points="12,8 16,12 12,16 8,12" fill="currentColor" stroke="none" />
   </svg>
 );
 
@@ -171,10 +172,10 @@ function Slider({
   onChange: (v: number) => void;
   desc?: string;
 }) {
-  // Compute inline style for teal fill progress
+  // Compute inline style for accent fill progress
   const pct = value;
   const trackStyle = {
-    background: `linear-gradient(to right, var(--rt-accent) 0%, var(--rt-accent) ${pct}%, var(--rt-surface-raised) ${pct}%, var(--rt-surface-raised) 100%)`,
+    background: `linear-gradient(to right, var(--rt-accent) 0%, var(--rt-accent) ${pct}%, var(--rt-bg-subtle) ${pct}%, var(--rt-bg-subtle) 100%)`,
   };
 
   return (
@@ -277,7 +278,7 @@ function Options() {
       <div className="rt-opts-container">
         {/* Header */}
         <div className="rt-opts-header">
-          <span className="rt-opts-logo"><IconScan /></span>
+          <span className="rt-opts-logo"><IconEyeLogo /></span>
           <span className="rt-opts-title">RealTube Settings</span>
           <span className="rt-opts-subtitle">v0.1.0</span>
         </div>

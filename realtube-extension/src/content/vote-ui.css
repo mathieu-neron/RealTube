@@ -1,22 +1,5 @@
 /* RealTube Vote UI — injected into YouTube watch pages */
-/* Aesthetic: YouTube-native chameleon with teal AI-detection accent */
-
-/* ═══════ CSS VARIABLES ═══════ */
-:root {
-  --rt-accent: #00b4d8;
-  --rt-accent-dim: rgba(0, 180, 216, 0.15);
-  --rt-accent-glow: rgba(0, 180, 216, 0.35);
-  --rt-surface: #212121;
-  --rt-surface-hover: #2a2a2a;
-  --rt-surface-raised: #303030;
-  --rt-text: #f1f1f1;
-  --rt-text-muted: #aaa;
-  --rt-border: rgba(255, 255, 255, 0.1);
-  --rt-danger: #ff4444;
-  --rt-success: #2ecc71;
-  --rt-radius: 8px;
-  --rt-font: "Roboto", "YouTube Noto", Arial, sans-serif;
-}
+/* Aesthetic: Warm-dark editorial, gold accent */
 
 /* ═══════ VOTE BUTTON (in YouTube action bar) ═══════ */
 .realtube-vote-btn {
@@ -28,13 +11,13 @@
   margin-left: 8px;
   border: none;
   border-radius: 18px;
-  background: var(--rt-surface-raised);
-  color: var(--rt-text);
-  font-family: var(--rt-font);
+  background: #303030;
+  color: #eeeae4;
+  font-family: "Roboto", "YouTube Noto", Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.15s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   position: relative;
   white-space: nowrap;
   user-select: none;
@@ -43,9 +26,9 @@
 }
 
 .realtube-vote-btn:hover {
-  background: var(--rt-accent-dim);
-  color: var(--rt-accent);
-  box-shadow: 0 0 0 1px var(--rt-accent-glow);
+  background: rgba(200, 160, 74, 0.12);
+  color: #c8a04a;
+  box-shadow: 0 0 0 1px rgba(200, 160, 74, 0.25);
 }
 
 .realtube-vote-btn:active {
@@ -57,4 +40,44 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+
+/* ═══════ SHORTS VOTE BUTTON (circular icon in Shorts action bar) ═══════ */
+.realtube-vote-btn-shorts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 48px;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: #eeeae4;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  outline: none;
+  padding: 6px 0;
+}
+
+.realtube-vote-btn-shorts:hover {
+  color: #c8a04a;
+}
+
+.realtube-vote-btn-shorts:active {
+  transform: scale(0.93);
+}
+
+.realtube-vote-btn-shorts svg {
+  width: 24px;
+  height: 24px;
+}
+
+.realtube-vote-btn-shorts-label {
+  font-size: 10px;
+  font-family: "Roboto", "YouTube Noto", Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 }

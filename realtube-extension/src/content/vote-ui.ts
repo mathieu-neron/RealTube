@@ -5,13 +5,23 @@
 import "./vote-ui.css";
 
 // ── SVG icon ──
-const ICON_SCAN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7V2h5"/><path d="M22 7V2h-5"/><path d="M2 17v5h5"/><path d="M22 17v5h-5"/><circle cx="12" cy="12" r="4"/></svg>`;
+const ICON_EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><polygon points="12,8 16,12 12,16 8,12" fill="currentColor" stroke="none"/></svg>`;
 
 // ── State ──
 let buttonEl: HTMLButtonElement | null = null;
 
 function getVideoId(): string | null {
-  return new URLSearchParams(window.location.search).get("v");
+  // Watch pages: /watch?v=VIDEO_ID
+  const v = new URLSearchParams(window.location.search).get("v");
+  if (v) return v;
+  // Shorts pages: /shorts/VIDEO_ID
+  const shortsMatch = window.location.pathname.match(/^\/shorts\/([a-zA-Z0-9_-]{11})/);
+  if (shortsMatch) return shortsMatch[1];
+  return null;
+}
+
+function isShortsPage(): boolean {
+  return window.location.pathname.startsWith("/shorts/");
 }
 
 // ── Button injection ──
@@ -27,14 +37,24 @@ function findActionBar(): Element | null {
   );
 }
 
+function findShortsActionBar(): Element | null {
+  return (
+    document.querySelector("ytd-reel-player-overlay-renderer #actions") ||
+    document.querySelector("ytd-shorts #actions") ||
+    document.querySelector("#shorts-player #actions")
+  );
+}
+
 /** Inject the RealTube vote button into YouTube's action bar. */
 export function injectVoteButton(): void {
   // Don't double-inject
   if (buttonEl && document.contains(buttonEl)) return;
-  // Only on watch pages
-  if (!getVideoId()) return;
 
-  const actionBar = findActionBar();
+  const videoId = getVideoId();
+  if (!videoId) return;
+
+  const shorts = isShortsPage();
+  const actionBar = shorts ? findShortsActionBar() : findActionBar();
   if (!actionBar) {
     // Action bar not yet rendered; retry shortly
     setTimeout(() => injectVoteButton(), 800);
@@ -42,15 +62,21 @@ export function injectVoteButton(): void {
   }
 
   buttonEl = document.createElement("button");
-  buttonEl.className = "realtube-vote-btn";
-  buttonEl.innerHTML = `${ICON_SCAN}<span>Flag AI</span>`;
   buttonEl.title = "Flag this video as AI-generated (RealTube)";
   buttonEl.addEventListener("click", (e) => {
     e.stopPropagation();
     chrome.runtime.sendMessage({ type: "OPEN_POPUP" });
   });
 
-  actionBar.appendChild(buttonEl);
+  if (shorts) {
+    buttonEl.className = "realtube-vote-btn-shorts";
+    buttonEl.innerHTML = `${ICON_EYE}<span class="realtube-vote-btn-shorts-label">Flag AI</span>`;
+    actionBar.prepend(buttonEl);
+  } else {
+    buttonEl.className = "realtube-vote-btn";
+    buttonEl.innerHTML = `${ICON_EYE}<span>Flag AI</span>`;
+    actionBar.appendChild(buttonEl);
+  }
 }
 
 /** Remove the RealTube vote button from the page. */

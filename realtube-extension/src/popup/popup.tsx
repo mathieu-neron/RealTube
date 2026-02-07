@@ -48,8 +48,10 @@ async function sendMessage(
 function getVideoIdFromUrl(url: string): string | null {
   try {
     const u = new URL(url);
-    if (u.hostname.includes("youtube.com") && u.pathname === "/watch") {
-      return u.searchParams.get("v");
+    if (u.hostname.includes("youtube.com")) {
+      if (u.pathname === "/watch") return u.searchParams.get("v");
+      const shortsMatch = u.pathname.match(/^\/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (shortsMatch) return shortsMatch[1];
     }
   } catch {
     /* ignore */
@@ -70,7 +72,7 @@ function formatTimeAgo(isoDate: string | null): string {
 
 function scoreColor(score: number): string {
   if (score < 30) return "var(--rt-success)";
-  if (score < 60) return "var(--rt-warning)";
+  if (score < 60) return "var(--rt-accent)";
   return "var(--rt-danger)";
 }
 
@@ -82,9 +84,10 @@ function scoreVerdict(score: number): { text: string; cls: string } {
 
 // ── SVG Icons (inline) ──
 
-const IconScan = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 7V2h5" /><path d="M22 7V2h-5" /><path d="M2 17v5h5" /><path d="M22 17v5h-5" /><circle cx="12" cy="12" r="4" />
+const IconEye = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
+    <polygon points="12,8 16,12 12,16 8,12" fill="currentColor" stroke="none" />
   </svg>
 );
 
@@ -109,6 +112,13 @@ const IconRefresh = () => (
 const IconPause = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" /><line x1="10" y1="15" x2="10" y2="9" /><line x1="14" y1="15" x2="14" y2="9" />
+  </svg>
+);
+
+const IconGear = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
 
@@ -172,7 +182,7 @@ function StatusBar({
   return (
     <div className="rt-header">
       <div className="rt-header-left">
-        <span className="rt-logo-icon"><IconScan /></span>
+        <span className="rt-logo-icon"><IconEye /></span>
         <span className="rt-header-title">
           RealTube
           <span className="rt-header-version">v0.1.0</span>
@@ -183,6 +193,13 @@ function StatusBar({
           className={`rt-conn-dot ${connected}`}
           title={connected === "online" ? "Connected" : connected === "offline" ? "Offline" : "Checking..."}
         />
+        <button
+          className="rt-gear-btn"
+          title="Settings"
+          onClick={() => chrome.runtime.openOptionsPage()}
+        >
+          <IconGear />
+        </button>
         <label className="rt-toggle" title={enabled ? "Disable RealTube" : "Enable RealTube"}>
           <input type="checkbox" checked={enabled} onChange={onToggle} />
           <span className="rt-toggle-track" />
@@ -376,58 +393,51 @@ function Popup() {
 
     async function loadData() {
       try {
-        // Read enabled state
-        const storage = await chrome.storage.sync.get("enabled");
+        // Read enabled state + current tab (local, fast)
+        const [storage, [tab]] = await Promise.all([
+          chrome.storage.sync.get("enabled"),
+          chrome.tabs.query({ active: true, currentWindow: true }),
+        ]);
         if (cancelled) return;
-        setEnabled(storage.enabled !== false);
 
-        // Get current tab to detect watch page
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        setEnabled(storage.enabled !== false);
         const videoId = tab?.url ? getVideoIdFromUrl(tab.url) : null;
-        if (cancelled) return;
         setCurrentVideoId(videoId);
 
-        // Parallel data fetches
-        const promises: Promise<void>[] = [];
+        // Show UI immediately, fetch API data in background
+        setLoading(false);
 
         // User info
-        promises.push(
-          sendMessage("GET_USER_INFO").then((res) => {
-            if (!cancelled && res.success) {
-              setUserInfo(res.data as UserInfo);
-              setConnected("online");
-            }
-          }).catch(() => {
-            if (!cancelled) setConnected("offline");
-          })
-        );
+        sendMessage("GET_USER_INFO").then((res) => {
+          if (!cancelled && res.success) {
+            setUserInfo(res.data as UserInfo);
+            setConnected("online");
+          }
+        }).catch(() => {
+          if (!cancelled) setConnected("offline");
+        });
 
         // Sync status
-        promises.push(
-          sendMessage("GET_SYNC_STATUS").then((res) => {
-            if (!cancelled && res.success) setSyncStatus(res.data as SyncStatus);
-          }).catch(() => {})
-        );
+        sendMessage("GET_SYNC_STATUS").then((res) => {
+          if (!cancelled && res.success) setSyncStatus(res.data as SyncStatus);
+        }).catch(() => {});
 
         // Current video data
         if (videoId) {
-          promises.push(
-            sendMessage("CHECK_VIDEOS", { videoIds: [videoId] }).then((res) => {
-              if (!cancelled && res.success && res.data?.videos?.length > 0) {
-                const found = (res.data.videos as CachedVideo[]).find(
-                  (v) => v.videoId === videoId
-                );
-                if (found) setCurrentVideo(found);
-              }
-            }).catch(() => {})
-          );
+          sendMessage("CHECK_VIDEOS", { videoIds: [videoId] }).then((res) => {
+            if (!cancelled && res.success && res.data?.videos?.length > 0) {
+              const found = (res.data.videos as CachedVideo[]).find(
+                (v) => v.videoId === videoId
+              );
+              if (found) setCurrentVideo(found);
+            }
+          }).catch(() => {});
         }
-
-        await Promise.all(promises);
       } catch {
-        if (!cancelled) setConnected("offline");
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setConnected("offline");
+          setLoading(false);
+        }
       }
     }
 
