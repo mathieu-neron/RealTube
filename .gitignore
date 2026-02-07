@@ -1,0 +1,46 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Go
+realtube-go/tmp/
+realtube-go/vendor/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node / Extension
+realtube-extension/node_modules/
+realtube-extension/dist/
+realtube-extension/.parcel-cache/
+
+# Docker
+docker-compose.override.yml
+
+# Database exports (large files)
+exports/*.dump
+exports/*.sql.gz
+
+# Logs
+*.log
+
+# Secrets / certs
+nginx/certs/
