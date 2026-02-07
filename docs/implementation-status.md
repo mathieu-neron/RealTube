@@ -40,7 +40,7 @@ Last updated: 2026-02-07
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
 | 24 | Python Backend - Models (Pydantic) | done | 2026-02-07 | 4 model files; DB + API response types; camelCase aliases match Go backend; request models accept camelCase input |
-| 25 | Python Backend - Video Router | pending | | |
+| 25 | Python Backend - Video Router | done | 2026-02-07 | video_service.py + videos.py router; both endpoints verified with seeded data; camelCase JSON matches Go backend |
 | 26 | Python Backend - Vote Router | pending | | |
 | 27 | Python Backend - Trust & Score Services | pending | | |
 | 28 | Python Backend - Channel, User, Stats, Sync Routers | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 23
+- **Completed:** 24
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 25
+- **Pending:** 24
