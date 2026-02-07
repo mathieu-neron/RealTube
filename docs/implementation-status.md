@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 | 25 | Python Backend - Video Router | done | 2026-02-07 | video_service.py + videos.py router; both endpoints verified with seeded data; camelCase JSON matches Go backend |
 | 26 | Python Backend - Vote Router | done | 2026-02-07 | Atomic TX with upsert; submit/update/delete all verified; score recalculation inlined; camelCase JSON matches Go backend |
 | 27 | Python Backend - Trust & Score Services | done | 2026-02-07 | 32/32 tests pass; trust (age/accuracy/volume/composite/effective/base weight) + score (pure-logic helper); refactored recalculate_video_score out of vote_service |
-| 28 | Python Backend - Channel, User, Stats, Sync Routers | pending | | |
+| 28 | Python Backend - Channel, User, Stats, Sync Routers | done | 2026-02-07 | 4 routers + channel_service; all endpoints verified against live DB; camelCase JSON matches Go backend |
 | 29 | Python Backend - Redis Cache, Rate Limiting, Health | pending | | |
 
 ## Phase 4: Infrastructure & Extension
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 26
+- **Completed:** 27
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 22
+- **Pending:** 21

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.db.database import create_pool
-from app.routers import videos, votes
+from app.routers import channels, stats, sync, users, videos, votes
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -25,6 +25,10 @@ app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 
 app.include_router(videos.router)
 app.include_router(votes.router)
+app.include_router(channels.router)
+app.include_router(users.router)
+app.include_router(stats.router)
+app.include_router(sync.router)
 
 
 @app.get("/health/live")
