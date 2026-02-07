@@ -64,7 +64,7 @@ Last updated: 2026-02-07
 
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
-| 39 | API Contract Test Suite | pending | | |
+| 39 | API Contract Test Suite | done | 2026-02-07 | 7 test suites (health, videos, votes, channels/users/stats, sync, rate limits); curl+bash+python JSON assertions; run_tests.sh runner; 59 pass Go, 61 pass Python; fixed Go model NULL handling (nullable DB columns → *string pointers) |
 | 40 | Database Export Service | pending | | |
 | 41 | Channel Auto-Flag Background Job | pending | | |
 | 42 | Async Score Recalculation Worker | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 38
+- **Completed:** 39
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 10
+- **Pending:** 9

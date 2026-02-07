@@ -5,8 +5,8 @@ import "time"
 // Video represents a flagged video in the database.
 type Video struct {
 	VideoID       string    `json:"videoId"`
-	ChannelID     string    `json:"channelId,omitempty"`
-	Title         string    `json:"title,omitempty"`
+	ChannelID     *string   `json:"channelId,omitempty"`
+	Title         *string   `json:"title,omitempty"`
 	Score         float64   `json:"score"`
 	TotalVotes    int       `json:"totalVotes"`
 	Locked        bool      `json:"locked"`
@@ -34,7 +34,7 @@ type VideoResponse struct {
 	Categories   map[string]*CategoryDetail   `json:"categories"`
 	TotalVotes   int                          `json:"totalVotes"`
 	Locked       bool                         `json:"locked"`
-	ChannelID    string                       `json:"channelId,omitempty"`
+	ChannelID    *string                      `json:"channelId,omitempty"`
 	ChannelScore float64                      `json:"channelScore,omitempty"`
 	LastUpdated  time.Time                    `json:"lastUpdated"`
 }

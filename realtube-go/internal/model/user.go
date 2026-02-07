@@ -13,8 +13,8 @@ type User struct {
 	LastActive    time.Time `json:"-"`
 	IsVIP         bool      `json:"isVip"`
 	IsShadowbanned bool    `json:"-"`
-	BanReason     string    `json:"-"`
-	Username      string    `json:"username,omitempty"`
+	BanReason     *string   `json:"-"`
+	Username      *string   `json:"username,omitempty"`
 }
 
 // UserResponse is the API response for user info.
