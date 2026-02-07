@@ -25,12 +25,15 @@ func main() {
 
 	// Repositories
 	videoRepo := repository.NewVideoRepo(pool)
+	voteRepo := repository.NewVoteRepo(pool)
 
 	// Services
 	videoSvc := service.NewVideoService(videoRepo)
+	voteSvc := service.NewVoteService(voteRepo)
 
 	// Handlers
 	videoHandler := handler.NewVideoHandler(videoSvc)
+	voteHandler := handler.NewVoteHandler(voteSvc)
 
 	app := fiber.New(fiber.Config{
 		AppName:      "RealTube API",
@@ -44,6 +47,10 @@ func main() {
 	// Video routes
 	app.Get("/api/videos/:hashPrefix", videoHandler.GetByHashPrefix)
 	app.Get("/api/videos", videoHandler.GetByVideoID)
+
+	// Vote routes
+	app.Post("/api/votes", voteHandler.Submit)
+	app.Delete("/api/votes", voteHandler.Delete)
 
 	log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
 	log.Fatal(app.Listen(":" + cfg.Port))
