@@ -52,7 +52,7 @@ Last updated: 2026-02-07
 |------|------------|--------|------|-------|
 | 30 | Docker Compose - Full Stack | done | 2026-02-07 | 5 services: postgres, redis, go-backend, python-backend, db-exporter; both backends healthy; used 127.0.0.1 in Go healthcheck (Alpine resolves localhost to IPv6) |
 | 31 | NGINX Reverse Proxy Configuration | done | 2026-02-07 | 4 rate limit zones (api/votes/sync/export); proxy cache with per-endpoint TTLs (videos 5s, channels 60s, stats 5m, sync/full 1h); /py/api/ prefix routes to Python; X-Cache-Status header on cached endpoints |
-| 32 | Extension - Project Scaffold & Build System | pending | | |
+| 32 | Extension - Project Scaffold & Build System | done | 2026-02-07 | Webpack 5 + ts-loader + React 19; Chrome MV3 + Firefox MV2 manifests; 4 entry points (background, content, popup, options); `npm run build` produces dist/chrome/ and dist/firefox/ |
 | 33 | Extension - Background Service Worker | pending | | |
 | 34 | Extension - IndexedDB Cache Layer | pending | | |
 | 35 | Extension - Content Script (Video Detection & Hiding) | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 31
+- **Completed:** 32
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 17
+- **Pending:** 16
