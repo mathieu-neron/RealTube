@@ -25,7 +25,14 @@ func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	app.Use(middleware.NewRequestLogger())
 	app.Use(middleware.NewCORS(corsOrigins))
 
-	// Health check (before API group, no auth needed)
+	// Rate limiters (per-route, matching api-contract.md §5.3)
+	videoRL := middleware.NewVideoRateLimiter()
+	voteSubmitRL := middleware.NewVoteSubmitRateLimiter()
+	voteDeleteRL := middleware.NewVoteDeleteRateLimiter()
+	syncRL := middleware.NewSyncRateLimiter()
+	statsRL := middleware.NewStatsRateLimiter()
+
+	// Health check (before API group, no rate limiting)
 	app.Get("/health/live", func(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
@@ -33,24 +40,24 @@ func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	// API routes
 	api := app.Group("/api")
 
-	// Video routes
-	api.Get("/videos/:hashPrefix", h.Video.GetByHashPrefix)
-	api.Get("/videos", h.Video.GetByVideoID)
+	// Video routes — 100 req/min per IP
+	api.Get("/videos/:hashPrefix", videoRL.Handler(), h.Video.GetByHashPrefix)
+	api.Get("/videos", videoRL.Handler(), h.Video.GetByVideoID)
 
-	// Vote routes
-	api.Post("/votes", h.Vote.Submit)
-	api.Delete("/votes", h.Vote.Delete)
+	// Vote routes — per-user limits
+	api.Post("/votes", voteSubmitRL.Handler(), h.Vote.Submit)
+	api.Delete("/votes", voteDeleteRL.Handler(), h.Vote.Delete)
 
-	// Channel routes
-	api.Get("/channels/:channelId", h.Channel.GetByChannelID)
+	// Channel routes — same limits as video
+	api.Get("/channels/:channelId", videoRL.Handler(), h.Channel.GetByChannelID)
 
-	// User routes
-	api.Get("/users/:userId", h.User.GetByUserID)
+	// User routes — same limits as video
+	api.Get("/users/:userId", videoRL.Handler(), h.User.GetByUserID)
 
-	// Stats routes
-	api.Get("/stats", h.Stats.GetStats)
+	// Stats routes — 10 req/min per IP
+	api.Get("/stats", statsRL.Handler(), h.Stats.GetStats)
 
-	// Sync routes
-	api.Get("/sync/delta", h.Sync.DeltaSync)
-	api.Get("/sync/full", h.Sync.FullSync)
+	// Sync routes — 2 req/min per user
+	api.Get("/sync/delta", syncRL.Handler(), h.Sync.DeltaSync)
+	api.Get("/sync/full", syncRL.Handler(), h.Sync.FullSync)
 }
