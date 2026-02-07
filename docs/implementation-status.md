@@ -20,8 +20,8 @@ Last updated: 2026-02-06
 
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
-| 10 | Go Backend - Models | pending | | |
-| 11 | Go Backend - Hash Utilities | pending | | |
+| 10 | Go Backend - Models | done | 2026-02-07 | 4 model files; DB + API response types; go build + go vet pass |
+| 11 | Go Backend - Hash Utilities | done | 2026-02-07 | 7/7 tests pass; prefix, iterated SHA256, user ID, IP hashing |
 | 12 | Go Backend - Video Repository & Handler | pending | | |
 | 13 | Go Backend - Vote Repository & Handler | pending | | |
 | 14 | Go Backend - Trust Score Service | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 9
+- **Completed:** 11
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 39
+- **Pending:** 37
