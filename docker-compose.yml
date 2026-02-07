@@ -1,14 +1,28 @@
 # RealTube - Docker Compose Stack
-# Services will be added incrementally during implementation.
 # See docs/design/infrastructure-design.md for the full target configuration.
 #
-# Planned services:
-#   go-backend      (Step 30) - Go/Fiber primary API
-#   python-backend  (Step 30) - Python/FastAPI secondary API
-#   nginx           (Step 31) - Reverse proxy
-#   db-exporter     (Step 40) - Daily pg_dump
+# Services:
+#   postgres        - PostgreSQL 16 database
+#   redis           - Redis 7 cache
+#   go-backend      - Go/Fiber primary API (port 8080)
+#   python-backend  - Python/FastAPI secondary API (port 8081)
+#   db-exporter     - Daily pg_dump to ./exports/
+#   nginx           - NGINX reverse proxy (port 80)
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      go-backend:
+        condition: service_healthy
+      python-backend:
+        condition: service_healthy
+    restart: unless-stopped
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -38,6 +52,75 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+
+  go-backend:
+    build:
+      context: ./realtube-go
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://realtube:password@postgres:5432/realtube
+      - REDIS_URL=redis://redis:6379
+      - PORT=8080
+      - LOG_LEVEL=info
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=*
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  python-backend:
+    build:
+      context: ./realtube-python
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://realtube:password@postgres:5432/realtube
+      - REDIS_URL=redis://redis:6379
+      - PORT=8081
+      - LOG_LEVEL=info
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=*
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8081/health/live').raise_for_status()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  db-exporter:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: postgres
+      PGUSER: realtube
+      PGPASSWORD: password
+      PGDATABASE: realtube
+    volumes:
+      - ./exports:/exports
+    entrypoint: >
+      sh -c "while true; do
+        pg_dump -Fc realtube > /exports/realtube-$$(date +%Y%m%d).dump;
+        sleep 86400;
+      done"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
