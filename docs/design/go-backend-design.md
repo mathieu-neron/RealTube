@@ -54,18 +54,26 @@ realtube-go/
 ### Key Dependencies
 
 ```
-github.com/gofiber/fiber/v2       -- Web framework
+github.com/gofiber/fiber/v3       -- Web framework (v3)
 github.com/jackc/pgx/v5           -- PostgreSQL driver (high performance)
 github.com/redis/go-redis/v9      -- Redis client
 github.com/golang-migrate/migrate -- Database migrations
 github.com/rs/zerolog              -- Structured logging
 ```
 
+### Fiber v3 Notes
+
+- Handler signature: `func(fiber.Ctx) error` (value receiver, not pointer)
+- Import: `github.com/gofiber/fiber/v3`
+- Middleware imports: `github.com/gofiber/fiber/v3/middleware/cors`, etc.
+- `c.JSON()` returns error directly
+- `c.Bind().JSON(&body)` for request body parsing
+
 ### Middleware Stack
 
 ```go
 app.Use(middleware.RequestLogger())    // Log all requests
-app.Use(middleware.CORS())             // Allow extension origins
+app.Use(cors.New())                   // Allow extension origins
 app.Use(middleware.RateLimiter())      // Per-IP rate limiting
-app.Use(middleware.Recover())          // Panic recovery
+app.Use(recover.New())                // Panic recovery
 ```
