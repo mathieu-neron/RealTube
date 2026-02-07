@@ -72,13 +72,13 @@ Last updated: 2026-02-07
 | 44 | Extension - Shorts Support | done | 2026-02-07 | shorts.ts: video ID extraction from ytd-reel-video-renderer (4 strategies), skip-to-next via nav button/scroll, URL polling for intra-shorts navigation, dedicated MutationObserver; content.ts: startShortsMode/stopShortsMode lifecycle tied to page type; builds for both Chrome (9.69 KiB) and Firefox |
 | 45 | Extension - Offline Vote Queue | done | 2026-02-07 | offline-queue.ts: enqueue on submit failure, flush on reconnect (online event) + 30s retry + startup flush; 7-day expiry for stale votes; SUBMIT_VOTE falls back to queue; FLUSH_PENDING_VOTES + pendingVoteCount in GET_STATUS; background.js 10.7 KiB |
 | 46 | Structured Logging (Both Backends) | done | 2026-02-07 | Go: zerolog v1.34 (JSON to stdout, configurable level via LOG_LEVEL, service field, per-request method/path/status/duration_ms/ip/bytes_sent); Python: structlog v25.5 (JSON to stdout, ASGI middleware, same fields); main.go uses zerolog instead of stdlib log; all Go tests pass |
-| 47 | Prometheus Metrics Endpoint | pending | | |
+| 47 | Prometheus Metrics Endpoint | done | 2026-02-07 | Go: prometheus/client_golang + fasthttpadaptor for Fiber v3; Python: prometheus-client; 8 collectors (votes, request_duration, in_flight, cache_hits/misses, score_recalc_duration, db_pool_active/idle); MetricsMiddleware skips /metrics, copies path before c.Next() to avoid fasthttp buffer corruption; endpoint sanitization prevents cardinality explosion |
 | 48 | End-to-End Integration Test | pending | | |
 
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 46
+- **Completed:** 47
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 2
+- **Pending:** 1

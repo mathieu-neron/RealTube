@@ -24,6 +24,7 @@ type Handlers struct {
 func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	// Middleware stack (order matters)
 	app.Use(recoverer.New())
+	app.Use(handler.MetricsMiddleware())
 	app.Use(middleware.NewRequestLogger())
 	app.Use(middleware.NewCORS(corsOrigins))
 
@@ -37,6 +38,9 @@ func Setup(app *fiber.App, h *Handlers, corsOrigins string) {
 	// Health check endpoints (no rate limiting)
 	app.Get("/health/live", h.Health.Live)
 	app.Get("/health/ready", h.Health.Ready)
+
+	// Prometheus metrics endpoint
+	app.Get("/metrics", handler.MetricsHandler())
 
 	// API routes
 	api := app.Group("/api")

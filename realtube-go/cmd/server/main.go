@@ -48,6 +48,9 @@ func main() {
 	userSvc := service.NewUserService(userRepo)
 	syncSvc := service.NewSyncService(pool, videoSvc, channelSvc)
 
+	// Initialize Prometheus metrics
+	handler.InitMetrics(pool)
+
 	// Handlers
 	handlers := &router.Handlers{
 		Video:   handler.NewVideoHandler(videoSvc),

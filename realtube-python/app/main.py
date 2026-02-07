@@ -8,7 +8,7 @@ from app.config import settings
 from app.db.database import create_pool
 from app.middleware.logging import StructuredLoggingMiddleware, configure_logging
 from app.middleware.ratelimit import RateLimitMiddleware, configure_rate_limiters
-from app.routers import channels, export, health, stats, sync, users, videos, votes
+from app.routers import channels, export, health, metrics, stats, sync, users, videos, votes
 from app.services.cache_service import create_cache_service
 from app.services import channel_worker, score_worker
 
@@ -54,6 +54,7 @@ app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 # Middleware stack (order matters — last added is outermost)
 app.add_middleware(RateLimitMiddleware, limiters=configure_rate_limiters())
 app.add_middleware(StructuredLoggingMiddleware)
+app.add_middleware(metrics.PrometheusMiddleware)
 
 app.include_router(health.router)
 app.include_router(videos.router)
@@ -63,6 +64,7 @@ app.include_router(users.router)
 app.include_router(stats.router)
 app.include_router(sync.router)
 app.include_router(export.router)
+app.include_router(metrics.router)
 
 
 if __name__ == "__main__":
