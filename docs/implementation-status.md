@@ -24,7 +24,7 @@ Last updated: 2026-02-06
 | 11 | Go Backend - Hash Utilities | done | 2026-02-07 | 7/7 tests pass; prefix, iterated SHA256, user ID, IP hashing |
 | 12 | Go Backend - Video Repository & Handler | done | 2026-02-07 | Repo + service + handler; both endpoints verified with seeded data |
 | 13 | Go Backend - Vote Repository & Handler | done | 2026-02-07 | Atomic TX with upsert; submit/update/delete all verified |
-| 14 | Go Backend - Trust Score Service | pending | | |
+| 14 | Go Backend - Trust Score Service | done | 2026-02-07 | 18/18 tests pass; age/accuracy/volume factors, composite score, effective weight, base weight |
 | 15 | Go Backend - Video Score Recalculation | pending | | |
 | 16 | Go Backend - Channel Repository & Handler | pending | | |
 | 17 | Go Backend - User Info & Stats Handlers | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 13
+- **Completed:** 14
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 35
+- **Pending:** 34
