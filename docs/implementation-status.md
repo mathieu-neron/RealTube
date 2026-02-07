@@ -28,7 +28,7 @@ Last updated: 2026-02-06
 | 15 | Go Backend - Video Score Recalculation | done | 2026-02-07 | 8/8 score tests pass; per-category weighted scores + max overall; wired into vote submit/delete |
 | 16 | Go Backend - Channel Repository & Handler | done | 2026-02-07 | Repo (find, top categories, score aggregation), service, handler, 7 unit tests; pure-logic helper for channel score formula |
 | 17 | Go Backend - User Info & Stats Handlers | done | 2026-02-07 | user_repo + user_svc + user handler + stats handler; account age in days; top categories by vote_count |
-| 18 | Go Backend - Delta Sync & Full Sync Handlers | pending | | |
+| 18 | Go Backend - Delta Sync & Full Sync Handlers | done | 2026-02-07 | sync_svc (delta from sync_cache + channels, full from videos+channels); sync handler with RFC3339 validation; wired into main.go |
 | 19 | Go Backend - Router & Middleware Stack | pending | | |
 | 20 | Go Backend - Rate Limiting Middleware | pending | | |
 | 21 | Go Backend - Redis Cache Service | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 17
+- **Completed:** 18
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 31
+- **Pending:** 30

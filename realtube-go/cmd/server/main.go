@@ -35,6 +35,7 @@ func main() {
 	voteSvc := service.NewVoteService(voteRepo, scoreSvc)
 	channelSvc := service.NewChannelService(channelRepo)
 	userSvc := service.NewUserService(userRepo)
+	syncSvc := service.NewSyncService(pool, videoSvc, channelSvc)
 
 	// Handlers
 	videoHandler := handler.NewVideoHandler(videoSvc)
@@ -42,6 +43,7 @@ func main() {
 	channelHandler := handler.NewChannelHandler(channelSvc)
 	userHandler := handler.NewUserHandler(userSvc)
 	statsHandler := handler.NewStatsHandler(userSvc)
+	syncHandler := handler.NewSyncHandler(syncSvc)
 
 	app := fiber.New(fiber.Config{
 		AppName:      "RealTube API",
@@ -68,6 +70,10 @@ func main() {
 
 	// Stats routes
 	app.Get("/api/stats", statsHandler.GetStats)
+
+	// Sync routes
+	app.Get("/api/sync/delta", syncHandler.DeltaSync)
+	app.Get("/api/sync/full", syncHandler.FullSync)
 
 	log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
 	log.Fatal(app.Listen(":" + cfg.Port))
