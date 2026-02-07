@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/model"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/repository"
@@ -11,10 +12,11 @@ import (
 type VoteService struct {
 	repo     *repository.VoteRepo
 	scoreSvc *ScoreService
+	cache    *CacheService
 }
 
-func NewVoteService(repo *repository.VoteRepo, scoreSvc *ScoreService) *VoteService {
-	return &VoteService{repo: repo, scoreSvc: scoreSvc}
+func NewVoteService(repo *repository.VoteRepo, scoreSvc *ScoreService, cache *CacheService) *VoteService {
+	return &VoteService{repo: repo, scoreSvc: scoreSvc, cache: cache}
 }
 
 // Submit processes a vote submission request.
@@ -31,6 +33,13 @@ func (s *VoteService) Submit(ctx context.Context, req model.VoteRequest, ipHash 
 	// Recalculate video score after vote change
 	if err := s.scoreSvc.RecalculateVideoScore(ctx, req.VideoID); err != nil {
 		return nil, err
+	}
+
+	// Invalidate cache so next read gets fresh data
+	if s.cache != nil {
+		if err := s.cache.InvalidateVideo(ctx, req.VideoID); err != nil {
+			log.Printf("cache: invalidate video error: %v", err)
+		}
 	}
 
 	score, err := s.repo.GetVideoScore(ctx, req.VideoID)
@@ -50,5 +59,17 @@ func (s *VoteService) Delete(ctx context.Context, req model.VoteDeleteRequest) e
 	if err := s.repo.DeleteVote(ctx, req.VideoID, req.UserID); err != nil {
 		return err
 	}
-	return s.scoreSvc.RecalculateVideoScore(ctx, req.VideoID)
+
+	if err := s.scoreSvc.RecalculateVideoScore(ctx, req.VideoID); err != nil {
+		return err
+	}
+
+	// Invalidate cache so next read gets fresh data
+	if s.cache != nil {
+		if err := s.cache.InvalidateVideo(ctx, req.VideoID); err != nil {
+			log.Printf("cache: invalidate video error: %v", err)
+		}
+	}
+
+	return nil
 }

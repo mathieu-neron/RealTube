@@ -24,6 +24,10 @@ func main() {
 	}
 	defer pool.Close()
 
+	// Redis cache (graceful degradation — runs without Redis)
+	cacheSvc := service.NewCacheService(cfg.RedisURL)
+	defer cacheSvc.Close()
+
 	// Repositories
 	videoRepo := repository.NewVideoRepo(pool)
 	voteRepo := repository.NewVoteRepo(pool)
@@ -31,10 +35,10 @@ func main() {
 	userRepo := repository.NewUserRepo(pool)
 
 	// Services
-	videoSvc := service.NewVideoService(videoRepo)
+	videoSvc := service.NewVideoService(videoRepo, cacheSvc)
 	scoreSvc := service.NewScoreService(pool)
-	voteSvc := service.NewVoteService(voteRepo, scoreSvc)
-	channelSvc := service.NewChannelService(channelRepo)
+	voteSvc := service.NewVoteService(voteRepo, scoreSvc, cacheSvc)
+	channelSvc := service.NewChannelService(channelRepo, cacheSvc)
 	userSvc := service.NewUserService(userRepo)
 	syncSvc := service.NewSyncService(pool, videoSvc, channelSvc)
 
