@@ -29,7 +29,7 @@ Last updated: 2026-02-06
 | 16 | Go Backend - Channel Repository & Handler | done | 2026-02-07 | Repo (find, top categories, score aggregation), service, handler, 7 unit tests; pure-logic helper for channel score formula |
 | 17 | Go Backend - User Info & Stats Handlers | done | 2026-02-07 | user_repo + user_svc + user handler + stats handler; account age in days; top categories by vote_count |
 | 18 | Go Backend - Delta Sync & Full Sync Handlers | done | 2026-02-07 | sync_svc (delta from sync_cache + channels, full from videos+channels); sync handler with RFC3339 validation; wired into main.go |
-| 19 | Go Backend - Router & Middleware Stack | pending | | |
+| 19 | Go Backend - Router & Middleware Stack | done | 2026-02-07 | router.go with /api group, CORS middleware (configurable origins), request logger, panic recovery; main.go refactored to use router.Setup() |
 | 20 | Go Backend - Rate Limiting Middleware | pending | | |
 | 21 | Go Backend - Redis Cache Service | pending | | |
 | 22 | Go Backend - Health Check Endpoints | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 18
+- **Completed:** 19
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 30
+- **Pending:** 29
