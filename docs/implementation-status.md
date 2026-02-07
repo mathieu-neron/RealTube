@@ -12,7 +12,7 @@ Last updated: 2026-02-06
 | 4 | PostgreSQL Migration - Cache & Triggers | done | 2026-02-06 | Verified: 2 cache tables + trigger function + trigger on votes |
 | 5 | Docker Compose - PostgreSQL & Redis | done | 2026-02-06 | Both healthy; 9 tables auto-created from initdb.d mount; Redis PONG |
 | 6 | Go Backend - Project Scaffold | done | 2026-02-06 | Fiber v3, Go 1.25.7; go build + docker build pass |
-| 7 | Python Backend - Project Scaffold | pending | | |
+| 7 | Python Backend - Project Scaffold | done | 2026-02-06 | FastAPI 0.128, uvicorn starts, docker build passes |
 | 8 | Go Backend - Database Connection Pool | pending | | |
 | 9 | Python Backend - Database Connection Pool | pending | | |
 
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 6
+- **Completed:** 7
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 42
+- **Pending:** 41
