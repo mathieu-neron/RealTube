@@ -8,7 +8,7 @@ Last updated: 2026-02-06
 |------|------------|--------|------|-------|
 | 1 | Initialize Git Repository & Root Structure | done | 2026-02-06 | Used `services: {}` for valid empty compose file |
 | 2 | PostgreSQL Migration - Core Tables | done | 2026-02-06 | Verified: 3 tables, 10 indexes created in Docker PostgreSQL |
-| 3 | PostgreSQL Migration - Channels & Users | pending | | |
+| 3 | PostgreSQL Migration - Channels & Users | done | 2026-02-06 | Verified: 4 new tables, all 7 tables confirmed in Docker PostgreSQL |
 | 4 | PostgreSQL Migration - Cache & Triggers | pending | | |
 | 5 | Docker Compose - PostgreSQL & Redis | pending | | |
 | 6 | Go Backend - Project Scaffold | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 2
+- **Completed:** 3
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 46
+- **Pending:** 45
