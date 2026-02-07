@@ -70,7 +70,7 @@ Last updated: 2026-02-07
 | 42 | Async Score Recalculation Worker | done | 2026-02-07 | Go score_worker.go + Python score_worker.py; PG LISTEN/NOTIFY on vote_changes; 5s batch window deduplicates video IDs; manual pg_notify on vote DELETE; vote_svc no longer blocks on recalculation; both workers verified (batch logs + DB score updates) |
 | 43 | Security Hardening - Input Validation | done | 2026-02-07 | Go validation.go (regex + length checks) + Python validation.py; ErrorResponse helper standardizes all error JSON; validators for videoId, userId, channelId, hashPrefix, userAgent; contract tests updated to use valid test IDs; Go 59 pass, Python 61 pass |
 | 44 | Extension - Shorts Support | done | 2026-02-07 | shorts.ts: video ID extraction from ytd-reel-video-renderer (4 strategies), skip-to-next via nav button/scroll, URL polling for intra-shorts navigation, dedicated MutationObserver; content.ts: startShortsMode/stopShortsMode lifecycle tied to page type; builds for both Chrome (9.69 KiB) and Firefox |
-| 45 | Extension - Offline Vote Queue | pending | | |
+| 45 | Extension - Offline Vote Queue | done | 2026-02-07 | offline-queue.ts: enqueue on submit failure, flush on reconnect (online event) + 30s retry + startup flush; 7-day expiry for stale votes; SUBMIT_VOTE falls back to queue; FLUSH_PENDING_VOTES + pendingVoteCount in GET_STATUS; background.js 10.7 KiB |
 | 46 | Structured Logging (Both Backends) | pending | | |
 | 47 | Prometheus Metrics Endpoint | pending | | |
 | 48 | End-to-End Integration Test | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 44
+- **Completed:** 45
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 4
+- **Pending:** 3

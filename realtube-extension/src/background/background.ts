@@ -5,6 +5,7 @@ import { getLocalId, getPublicUserId, hashVideoId } from "./identity";
 import * as api from "./api-client";
 import * as cache from "./cache";
 import { startSyncSchedule, performDeltaSync, performFullSync, getSyncStatus } from "./sync";
+import { enqueueVote, flushPendingVotes, startOfflineQueueListener, getPendingVoteCount } from "./offline-queue";
 
 // Message types for inter-component communication
 export type MessageType =
@@ -17,7 +18,8 @@ export type MessageType =
   | "CHECK_VIDEOS"
   | "SYNC_DELTA"
   | "SYNC_FULL"
-  | "GET_SYNC_STATUS";
+  | "GET_SYNC_STATUS"
+  | "FLUSH_PENDING_VOTES";
 
 export interface Message {
   type: MessageType;
@@ -145,14 +147,23 @@ async function handleMessage(
         videoId: string;
         category: string;
       };
-      const userId = await ensurePublicUserId();
-      const result = await api.submitVote({
-        videoId,
-        category,
-        userId,
-        userAgent: `RealTube/0.1.0 ${navigator.userAgent}`,
-      });
-      return { success: true, data: result };
+      try {
+        const userId = await ensurePublicUserId();
+        const result = await api.submitVote({
+          videoId,
+          category,
+          userId,
+          userAgent: `RealTube/0.1.0 ${navigator.userAgent}`,
+        });
+        return { success: true, data: result };
+      } catch (err) {
+        // Network failure — queue for later
+        await enqueueVote(videoId, category);
+        return {
+          success: true,
+          data: { queued: true, message: "Vote saved offline, will submit when connection is restored" },
+        };
+      }
     }
 
     case "DELETE_VOTE": {
@@ -177,14 +188,21 @@ async function handleMessage(
       return { success: true, data: status };
     }
 
+    case "FLUSH_PENDING_VOTES": {
+      const flushResult = await flushPendingVotes();
+      return { success: true, data: flushResult };
+    }
+
     case "GET_STATUS": {
       const localId = await getLocalId();
       const syncStatus = await getSyncStatus();
+      const pendingVoteCount = await getPendingVoteCount();
       return {
         success: true,
         data: {
           version: "0.1.0",
           hasLocalId: !!localId,
+          pendingVoteCount,
           ...syncStatus,
         },
       };
@@ -224,4 +242,6 @@ chrome.runtime.onMessage.addListener(
   console.log(`RealTube: public user ID ready (${userId.substring(0, 8)}...)`);
   // Start periodic sync schedule
   startSyncSchedule();
+  // Start offline vote queue listener (flushes pending votes on reconnect)
+  startOfflineQueueListener();
 })();
