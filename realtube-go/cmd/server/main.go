@@ -67,6 +67,10 @@ func main() {
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	// Start background workers
+	channelWorker := service.NewChannelWorker(pool, 15*time.Minute)
+	go channelWorker.Start(shutdownCtx)
+
 	// Start server in a goroutine
 	go func() {
 		log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)

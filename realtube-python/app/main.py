@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -8,6 +9,7 @@ from app.db.database import create_pool
 from app.middleware.ratelimit import RateLimitMiddleware, configure_rate_limiters
 from app.routers import channels, export, health, stats, sync, users, videos, votes
 from app.services.cache_service import create_cache_service
+from app.services import channel_worker
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -18,8 +20,19 @@ async def lifespan(app: FastAPI):
     # Startup
     app.state.db_pool = await create_pool(settings.database_url)
     app.state.cache_service = await create_cache_service(settings.redis_url)
+
+    # Start background workers
+    worker_task = asyncio.create_task(channel_worker.run(app.state.db_pool))
+
     yield
+
     # Shutdown
+    worker_task.cancel()
+    try:
+        await worker_task
+    except asyncio.CancelledError:
+        pass
+
     await app.state.cache_service.close()
     logger.info("redis connection closed")
     await app.state.db_pool.close()

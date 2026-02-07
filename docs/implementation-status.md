@@ -66,7 +66,7 @@ Last updated: 2026-02-07
 |------|------------|--------|------|-------|
 | 39 | API Contract Test Suite | done | 2026-02-07 | 7 test suites (health, videos, votes, channels/users/stats, sync, rate limits); curl+bash+python JSON assertions; run_tests.sh runner; 59 pass Go, 61 pass Python; fixed Go model NULL handling (nullable DB columns → *string pointers) |
 | 40 | Database Export Service | done | 2026-02-07 | scripts/db-export.sh (privacy-filtered: excludes ip_hashes/vip_actions data, NULLs ip_hash in votes, zeros shadowban in users); Go export.go + Python export.py serve latest .sql.gz; db-exporter uses script; both backends verified (HTTP 200, 3.3KB gzip) |
-| 41 | Channel Auto-Flag Background Job | pending | | |
+| 41 | Channel Auto-Flag Background Job | done | 2026-02-07 | Go channel_worker.go + Python channel_worker.py; 15-min periodic tick; recalculates all channel scores; sets auto_flag_new when score>=80, flagged>=20, not locked; applies preliminary score 60 to new videos from auto-flagged channels; wired into main.go (goroutine) and main.py (asyncio task); verified: channel score=90, auto_flag=true, new video score=60 |
 | 42 | Async Score Recalculation Worker | pending | | |
 | 43 | Security Hardening - Input Validation | pending | | |
 | 44 | Extension - Shorts Support | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 40
+- **Completed:** 41
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 8
+- **Pending:** 7
