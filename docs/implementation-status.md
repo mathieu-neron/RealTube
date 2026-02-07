@@ -56,7 +56,7 @@ Last updated: 2026-02-07
 | 33 | Extension - Background Service Worker | done | 2026-02-07 | Message hub (6 message types), API client with retry/backoff, identity module (UUID + 5000x SHA256); builds for both Chrome and Firefox |
 | 34 | Extension - IndexedDB Cache Layer | done | 2026-02-07 | cache.ts: 4 object stores (videos, channels, pendingVotes, meta); CRUD + batch ops. sync.ts: delta (30min) + full (24h) + auto-sync schedule. background.ts: 4 new message types (CHECK_VIDEOS, SYNC_DELTA, SYNC_FULL, GET_SYNC_STATUS); cache-first lookup pattern |
 | 35 | Extension - Content Script (Video Detection & Hiding) | done | 2026-02-07 | dom-utils.ts: page type detection (6 types), video ID extraction from 5 renderer types + URL parsing. hide.ts: cache-first check via CHECK_VIDEOS message, threshold-based hiding with display:none. content.ts: init + MutationObserver (debounced 100ms) + SPA navigation (yt-navigate-finish) + settings listener |
-| 36 | Extension - Vote Submission UI | pending | | |
+| 36 | Extension - Vote Submission UI | done | 2026-02-07 | vote-ui.ts + vote-ui.css; "Flag AI" button injected into #top-level-buttons-computed; overlay with 5 categories, custom radio animations, submit/cancel/click-outside-close; success/error feedback with auto-close; content.ts updated to inject on watch pages and remove on navigation; CSS extracted to content.css (5.91 KiB) |
 | 37 | Extension - Popup UI (React) | pending | | |
 | 38 | Extension - Options Page (React) | pending | | |
 
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 35
+- **Completed:** 36
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 13
+- **Pending:** 12

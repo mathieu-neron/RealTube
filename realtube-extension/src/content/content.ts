@@ -9,6 +9,7 @@ import {
   PageType,
 } from "./dom-utils";
 import { checkAndHideVideos } from "./hide";
+import { injectVoteButton, removeVoteButton } from "./vote-ui";
 
 const DEBOUNCE_MS = 100;
 const INITIAL_SCAN_DELAY_MS = 500;
@@ -79,6 +80,12 @@ function stopObserver(): void {
 function onNavigate(): void {
   currentPageType = detectPageType();
 
+  // Manage vote button: inject on watch pages, remove elsewhere
+  removeVoteButton();
+  if (currentPageType === "watch") {
+    setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
+  }
+
   // Re-scan after navigation with a small delay for DOM to settle
   setTimeout(() => scanVisibleVideos(), INITIAL_SCAN_DELAY_MS);
 }
@@ -123,6 +130,11 @@ async function init(): Promise<void> {
 
   // Initial scan after a short delay for DOM to be ready
   setTimeout(() => scanVisibleVideos(), INITIAL_SCAN_DELAY_MS);
+
+  // Inject vote button on watch pages
+  if (currentPageType === "watch") {
+    setTimeout(() => injectVoteButton(), INITIAL_SCAN_DELAY_MS);
+  }
 
   // Start observing for dynamically loaded content
   startObserver();
