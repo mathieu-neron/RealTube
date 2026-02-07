@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 
@@ -22,11 +26,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-	defer pool.Close()
 
 	// Redis cache (graceful degradation — runs without Redis)
 	cacheSvc := service.NewCacheService(cfg.RedisURL)
-	defer cacheSvc.Close()
 
 	// Repositories
 	videoRepo := repository.NewVideoRepo(pool)
@@ -60,6 +62,42 @@ func main() {
 
 	router.Setup(app, handlers, cfg.CORSOrigins)
 
-	log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
-	log.Fatal(app.Listen(":" + cfg.Port))
+	// Graceful shutdown: listen for SIGTERM/SIGINT
+	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Start server in a goroutine
+	go func() {
+		log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
+		if err := app.Listen(":" + cfg.Port); err != nil {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	// Block until shutdown signal
+	<-shutdownCtx.Done()
+	log.Println("shutdown signal received, draining connections...")
+
+	// Give in-flight requests 30 seconds to complete
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := app.ShutdownWithContext(timeoutCtx); err != nil {
+		log.Printf("server shutdown error: %v", err)
+	} else {
+		log.Println("server stopped accepting connections")
+	}
+
+	// Close Redis
+	if err := cacheSvc.Close(); err != nil {
+		log.Printf("redis close error: %v", err)
+	} else {
+		log.Println("redis connection closed")
+	}
+
+	// Close database pool
+	pool.Close()
+	log.Println("database pool closed")
+
+	log.Println("graceful shutdown complete")
 }
