@@ -54,7 +54,7 @@ Last updated: 2026-02-07
 | 31 | NGINX Reverse Proxy Configuration | done | 2026-02-07 | 4 rate limit zones (api/votes/sync/export); proxy cache with per-endpoint TTLs (videos 5s, channels 60s, stats 5m, sync/full 1h); /py/api/ prefix routes to Python; X-Cache-Status header on cached endpoints |
 | 32 | Extension - Project Scaffold & Build System | done | 2026-02-07 | Webpack 5 + ts-loader + React 19; Chrome MV3 + Firefox MV2 manifests; 4 entry points (background, content, popup, options); `npm run build` produces dist/chrome/ and dist/firefox/ |
 | 33 | Extension - Background Service Worker | done | 2026-02-07 | Message hub (6 message types), API client with retry/backoff, identity module (UUID + 5000x SHA256); builds for both Chrome and Firefox |
-| 34 | Extension - IndexedDB Cache Layer | pending | | |
+| 34 | Extension - IndexedDB Cache Layer | done | 2026-02-07 | cache.ts: 4 object stores (videos, channels, pendingVotes, meta); CRUD + batch ops. sync.ts: delta (30min) + full (24h) + auto-sync schedule. background.ts: 4 new message types (CHECK_VIDEOS, SYNC_DELTA, SYNC_FULL, GET_SYNC_STATUS); cache-first lookup pattern |
 | 35 | Extension - Content Script (Video Detection & Hiding) | pending | | |
 | 36 | Extension - Vote Submission UI | pending | | |
 | 37 | Extension - Popup UI (React) | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 33
+- **Completed:** 34
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 15
+- **Pending:** 14
