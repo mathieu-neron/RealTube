@@ -8,6 +8,9 @@ import (
 
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/config"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/db"
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/handler"
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/repository"
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
 )
 
 func main() {
@@ -20,6 +23,15 @@ func main() {
 	}
 	defer pool.Close()
 
+	// Repositories
+	videoRepo := repository.NewVideoRepo(pool)
+
+	// Services
+	videoSvc := service.NewVideoService(videoRepo)
+
+	// Handlers
+	videoHandler := handler.NewVideoHandler(videoSvc)
+
 	app := fiber.New(fiber.Config{
 		AppName:      "RealTube API",
 		ServerHeader: "RealTube",
@@ -28,6 +40,10 @@ func main() {
 	app.Get("/health/live", func(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})
 	})
+
+	// Video routes
+	app.Get("/api/videos/:hashPrefix", videoHandler.GetByHashPrefix)
+	app.Get("/api/videos", videoHandler.GetByVideoID)
 
 	log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
 	log.Fatal(app.Listen(":" + cfg.Port))
