@@ -41,7 +41,7 @@ Last updated: 2026-02-07
 |------|------------|--------|------|-------|
 | 24 | Python Backend - Models (Pydantic) | done | 2026-02-07 | 4 model files; DB + API response types; camelCase aliases match Go backend; request models accept camelCase input |
 | 25 | Python Backend - Video Router | done | 2026-02-07 | video_service.py + videos.py router; both endpoints verified with seeded data; camelCase JSON matches Go backend |
-| 26 | Python Backend - Vote Router | pending | | |
+| 26 | Python Backend - Vote Router | done | 2026-02-07 | Atomic TX with upsert; submit/update/delete all verified; score recalculation inlined; camelCase JSON matches Go backend |
 | 27 | Python Backend - Trust & Score Services | pending | | |
 | 28 | Python Backend - Channel, User, Stats, Sync Routers | pending | | |
 | 29 | Python Backend - Redis Cache, Rate Limiting, Health | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 24
+- **Completed:** 25
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 24
+- **Pending:** 23

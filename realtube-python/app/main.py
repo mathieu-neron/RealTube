@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.db.database import create_pool
-from app.routers import videos
+from app.routers import videos, votes
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger(__name__)
@@ -24,6 +24,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 
 app.include_router(videos.router)
+app.include_router(votes.router)
 
 
 @app.get("/health/live")
