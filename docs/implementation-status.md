@@ -14,7 +14,7 @@ Last updated: 2026-02-06
 | 6 | Go Backend - Project Scaffold | done | 2026-02-06 | Fiber v3, Go 1.25.7; go build + docker build pass |
 | 7 | Python Backend - Project Scaffold | done | 2026-02-06 | FastAPI 0.128, uvicorn starts, docker build passes |
 | 8 | Go Backend - Database Connection Pool | done | 2026-02-06 | pgx/v5 pool with retry; logs "database connected" |
-| 9 | Python Backend - Database Connection Pool | pending | | |
+| 9 | Python Backend - Database Connection Pool | done | 2026-02-07 | asyncpg pool with retry + lifespan events; logs "database connected" |
 
 ## Phase 2: Go Backend - Core API
 
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 8
+- **Completed:** 9
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 40
+- **Pending:** 39
