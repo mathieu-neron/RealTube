@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +12,7 @@ import (
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/config"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/db"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/handler"
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/repository"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/router"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
@@ -21,10 +21,14 @@ import (
 func main() {
 	cfg := config.Load()
 
+	// Initialize structured logger (must be first)
+	middleware.InitLogger(cfg.LogLevel, "realtube-go")
+	log := middleware.Logger
+
 	ctx := context.Background()
 	pool, err := db.NewPool(ctx, cfg.DatabaseURL)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatal().Err(err).Msg("failed to connect to database")
 	}
 
 	// Redis cache (graceful degradation — runs without Redis)
@@ -76,36 +80,40 @@ func main() {
 
 	// Start server in a goroutine
 	go func() {
-		log.Printf("RealTube Go backend starting on :%s (env=%s)", cfg.Port, cfg.Environment)
+		log.Info().
+			Str("port", cfg.Port).
+			Str("environment", cfg.Environment).
+			Str("log_level", cfg.LogLevel).
+			Msg("server starting")
 		if err := app.Listen(":" + cfg.Port); err != nil {
-			log.Fatalf("server error: %v", err)
+			log.Fatal().Err(err).Msg("server error")
 		}
 	}()
 
 	// Block until shutdown signal
 	<-shutdownCtx.Done()
-	log.Println("shutdown signal received, draining connections...")
+	log.Info().Msg("shutdown signal received, draining connections")
 
 	// Give in-flight requests 30 seconds to complete
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := app.ShutdownWithContext(timeoutCtx); err != nil {
-		log.Printf("server shutdown error: %v", err)
+		log.Error().Err(err).Msg("server shutdown error")
 	} else {
-		log.Println("server stopped accepting connections")
+		log.Info().Msg("server stopped accepting connections")
 	}
 
 	// Close Redis
 	if err := cacheSvc.Close(); err != nil {
-		log.Printf("redis close error: %v", err)
+		log.Error().Err(err).Msg("redis close error")
 	} else {
-		log.Println("redis connection closed")
+		log.Info().Msg("redis connection closed")
 	}
 
 	// Close database pool
 	pool.Close()
-	log.Println("database pool closed")
+	log.Info().Msg("database pool closed")
 
-	log.Println("graceful shutdown complete")
+	log.Info().Msg("graceful shutdown complete")
 }

@@ -1,18 +1,20 @@
 import asyncio
-import logging
 from contextlib import asynccontextmanager
 
+import structlog
 from fastapi import FastAPI
 
 from app.config import settings
 from app.db.database import create_pool
+from app.middleware.logging import StructuredLoggingMiddleware, configure_logging
 from app.middleware.ratelimit import RateLimitMiddleware, configure_rate_limiters
 from app.routers import channels, export, health, stats, sync, users, videos, votes
 from app.services.cache_service import create_cache_service
 from app.services import channel_worker, score_worker
 
-logging.basicConfig(level=settings.log_level.upper())
-logger = logging.getLogger(__name__)
+# Initialize structured logging (must be before any logger usage)
+configure_logging(log_level=settings.log_level, service="realtube-python")
+logger = structlog.get_logger()
 
 
 @asynccontextmanager
@@ -49,8 +51,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 
-# Rate limiting middleware
+# Middleware stack (order matters — last added is outermost)
 app.add_middleware(RateLimitMiddleware, limiters=configure_rate_limiters())
+app.add_middleware(StructuredLoggingMiddleware)
 
 app.include_router(health.router)
 app.include_router(videos.router)
