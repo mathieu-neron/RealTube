@@ -3,6 +3,7 @@ import logging
 import asyncpg
 
 from app.models.vote import VoteResponse
+from app.services.score_service import recalculate_video_score
 
 logger = logging.getLogger(__name__)
 
@@ -144,51 +145,3 @@ async def delete_vote(pool: asyncpg.Pool, video_id: str, user_id: str) -> None:
     await recalculate_video_score(pool, video_id)
 
 
-async def recalculate_video_score(pool: asyncpg.Pool, video_id: str) -> None:
-    """Recalculate per-category weighted scores and overall video score."""
-    async with pool.acquire() as conn:
-        async with conn.transaction():
-            # Get total trust weight across all votes
-            total_weight = await conn.fetchval(
-                "SELECT COALESCE(SUM(trust_weight), 0) FROM votes WHERE video_id = $1",
-                video_id,
-            )
-
-            if total_weight == 0:
-                await conn.execute(
-                    "UPDATE videos SET score = 0, last_updated = NOW() WHERE video_id = $1",
-                    video_id,
-                )
-                await conn.execute(
-                    "UPDATE video_categories SET weighted_score = 0 WHERE video_id = $1",
-                    video_id,
-                )
-                return
-
-            # Get per-category trust weight sums
-            rows = await conn.fetch(
-                """SELECT category, COALESCE(SUM(trust_weight), 0) AS weight_sum
-                   FROM votes WHERE video_id = $1 GROUP BY category""",
-                video_id,
-            )
-
-            max_score = 0.0
-            for row in rows:
-                weighted_score = (row["weight_sum"] / total_weight) * 100
-                if weighted_score > max_score:
-                    max_score = weighted_score
-
-                await conn.execute(
-                    """UPDATE video_categories SET weighted_score = $1
-                       WHERE video_id = $2 AND category = $3""",
-                    weighted_score,
-                    video_id,
-                    row["category"],
-                )
-
-            # Update overall video score (max across categories)
-            await conn.execute(
-                "UPDATE videos SET score = $1, last_updated = NOW() WHERE video_id = $2",
-                max_score,
-                video_id,
-            )
