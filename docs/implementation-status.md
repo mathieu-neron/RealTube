@@ -73,12 +73,12 @@ Last updated: 2026-02-07
 | 45 | Extension - Offline Vote Queue | done | 2026-02-07 | offline-queue.ts: enqueue on submit failure, flush on reconnect (online event) + 30s retry + startup flush; 7-day expiry for stale votes; SUBMIT_VOTE falls back to queue; FLUSH_PENDING_VOTES + pendingVoteCount in GET_STATUS; background.js 10.7 KiB |
 | 46 | Structured Logging (Both Backends) | done | 2026-02-07 | Go: zerolog v1.34 (JSON to stdout, configurable level via LOG_LEVEL, service field, per-request method/path/status/duration_ms/ip/bytes_sent); Python: structlog v25.5 (JSON to stdout, ASGI middleware, same fields); main.go uses zerolog instead of stdlib log; all Go tests pass |
 | 47 | Prometheus Metrics Endpoint | done | 2026-02-07 | Go: prometheus/client_golang + fasthttpadaptor for Fiber v3; Python: prometheus-client; 8 collectors (votes, request_duration, in_flight, cache_hits/misses, score_recalc_duration, db_pool_active/idle); MetricsMiddleware skips /metrics, copies path before c.Next() to avoid fasthttp buffer corruption; endpoint sanitization prevents cardinality explosion |
-| 48 | End-to-End Integration Test | pending | | |
+| 48 | End-to-End Integration Test | done | 2026-02-07 | 80 assertions across both backends; 8 sections: health, video lookup (direct+hash-prefix), vote lifecycle (submit→score update→delta sync→delete), channel lookup, user info & stats, full sync with seeded data verification, Prometheus metrics; seed_data.sql (channels, videos, categories, users, votes, sync_cache); cleanup on exit; graceful 429 handling for sync rate limits |
 
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 47
+- **Completed:** 48
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 1
+- **Pending:** 0
