@@ -25,7 +25,7 @@ Last updated: 2026-02-06
 | 12 | Go Backend - Video Repository & Handler | done | 2026-02-07 | Repo + service + handler; both endpoints verified with seeded data |
 | 13 | Go Backend - Vote Repository & Handler | done | 2026-02-07 | Atomic TX with upsert; submit/update/delete all verified |
 | 14 | Go Backend - Trust Score Service | done | 2026-02-07 | 18/18 tests pass; age/accuracy/volume factors, composite score, effective weight, base weight |
-| 15 | Go Backend - Video Score Recalculation | pending | | |
+| 15 | Go Backend - Video Score Recalculation | done | 2026-02-07 | 8/8 score tests pass; per-category weighted scores + max overall; wired into vote submit/delete |
 | 16 | Go Backend - Channel Repository & Handler | pending | | |
 | 17 | Go Backend - User Info & Stats Handlers | pending | | |
 | 18 | Go Backend - Delta Sync & Full Sync Handlers | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 14
+- **Completed:** 15
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 34
+- **Pending:** 33

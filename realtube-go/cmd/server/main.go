@@ -29,7 +29,8 @@ func main() {
 
 	// Services
 	videoSvc := service.NewVideoService(videoRepo)
-	voteSvc := service.NewVoteService(voteRepo)
+	scoreSvc := service.NewScoreService(pool)
+	voteSvc := service.NewVoteService(voteRepo, scoreSvc)
 
 	// Handlers
 	videoHandler := handler.NewVideoHandler(videoSvc)
