@@ -27,7 +27,7 @@ Last updated: 2026-02-06
 | 14 | Go Backend - Trust Score Service | done | 2026-02-07 | 18/18 tests pass; age/accuracy/volume factors, composite score, effective weight, base weight |
 | 15 | Go Backend - Video Score Recalculation | done | 2026-02-07 | 8/8 score tests pass; per-category weighted scores + max overall; wired into vote submit/delete |
 | 16 | Go Backend - Channel Repository & Handler | done | 2026-02-07 | Repo (find, top categories, score aggregation), service, handler, 7 unit tests; pure-logic helper for channel score formula |
-| 17 | Go Backend - User Info & Stats Handlers | pending | | |
+| 17 | Go Backend - User Info & Stats Handlers | done | 2026-02-07 | user_repo + user_svc + user handler + stats handler; account age in days; top categories by vote_count |
 | 18 | Go Backend - Delta Sync & Full Sync Handlers | pending | | |
 | 19 | Go Backend - Router & Middleware Stack | pending | | |
 | 20 | Go Backend - Rate Limiting Middleware | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-06
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 16
+- **Completed:** 17
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 32
+- **Pending:** 31
