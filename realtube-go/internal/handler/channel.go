@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
 )
 
@@ -19,32 +20,17 @@ func NewChannelHandler(svc *service.ChannelService) *ChannelHandler {
 
 // GetByChannelID handles GET /api/channels/:channelId
 func (h *ChannelHandler) GetByChannelID(c fiber.Ctx) error {
-	channelID := c.Params("channelId")
-	if channelID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "MISSING_PARAM",
-				"message": "channelId path parameter is required",
-			},
-		})
+	channelID, errMsg := middleware.ValidateChannelID(c.Params("channelId"))
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
 	}
 
 	resp, err := h.svc.Lookup(c.Context(), channelID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": fiber.Map{
-					"code":    "NOT_FOUND",
-					"message": "Channel not found",
-				},
-			})
+			return middleware.ErrorResponse(c, fiber.StatusNotFound, "NOT_FOUND", "Channel not found")
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to lookup channel",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to lookup channel")
 	}
 
 	return c.JSON(resp)

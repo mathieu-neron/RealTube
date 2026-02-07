@@ -3,9 +3,9 @@ from typing import Annotated
 
 import asyncpg
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 
 from app.dependencies import get_db
+from app.middleware.validation import error_response
 from app.models.user import StatsResponse
 
 logger = logging.getLogger(__name__)
@@ -38,15 +38,7 @@ async def get_stats(
         cat_rows = await pool.fetch(CATEGORY_QUERY)
     except Exception:
         logger.exception("Failed to fetch statistics")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to fetch statistics",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to fetch statistics")
 
     top_categories = {r["category"]: int(r["total"]) for r in cat_rows}
 

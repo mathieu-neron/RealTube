@@ -1,13 +1,13 @@
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import asyncpg
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
 
 from app.dependencies import get_db
+from app.middleware.validation import error_response
 from app.models.user import (
     SyncChannelEntry,
     SyncDeltaResponse,
@@ -28,28 +28,19 @@ async def delta_sync(
     since: Annotated[str | None, Query()] = None,
 ):
     if not since:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": {
-                    "code": "MISSING_PARAM",
-                    "message": "since query parameter is required (RFC3339 timestamp)",
-                }
-            },
-        )
+        return error_response(400, "MISSING_PARAM", "since query parameter is required (RFC3339 timestamp)")
 
     try:
         since_dt = datetime.fromisoformat(since)
     except ValueError:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": {
-                    "code": "INVALID_PARAM",
-                    "message": "since must be a valid RFC3339 timestamp",
-                }
-            },
-        )
+        return error_response(400, "INVALID_PARAM", "since must be a valid RFC3339 timestamp")
+
+    # Reject timestamps too far in the future (> 1 minute)
+    now = datetime.now(timezone.utc)
+    if since_dt.tzinfo is None:
+        since_dt = since_dt.replace(tzinfo=timezone.utc)
+    if since_dt > now.replace(microsecond=0) + timedelta(minutes=1):
+        return error_response(400, "INVALID_PARAM", "since must not be in the future")
 
     try:
         # Fetch changed videos from sync_cache
@@ -99,15 +90,7 @@ async def delta_sync(
 
     except Exception:
         logger.exception("Failed to fetch delta sync")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to fetch delta sync",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to fetch delta sync")
 
     resp = SyncDeltaResponse(
         videos=videos,
@@ -173,15 +156,7 @@ async def full_sync(
 
     except Exception:
         logger.exception("Failed to fetch full sync")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to fetch full sync",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to fetch full sync")
 
     resp = SyncFullResponse(
         videos=video_responses,

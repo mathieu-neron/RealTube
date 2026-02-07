@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
 )
 
@@ -20,32 +21,22 @@ func NewSyncHandler(svc *service.SyncService) *SyncHandler {
 func (h *SyncHandler) DeltaSync(c fiber.Ctx) error {
 	sinceStr := fiber.Query[string](c, "since")
 	if sinceStr == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "MISSING_PARAM",
-				"message": "since query parameter is required (RFC3339 timestamp)",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "MISSING_PARAM", "since query parameter is required (RFC3339 timestamp)")
 	}
 
 	since, err := time.Parse(time.RFC3339, sinceStr)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INVALID_PARAM",
-				"message": "since must be a valid RFC3339 timestamp",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_PARAM", "since must be a valid RFC3339 timestamp")
+	}
+
+	// Reject timestamps too far in the future (> 1 minute)
+	if since.After(time.Now().Add(time.Minute)) {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_PARAM", "since must not be in the future")
 	}
 
 	resp, err := h.svc.DeltaSync(c.Context(), since)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to fetch delta sync",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch delta sync")
 	}
 
 	return c.JSON(resp)
@@ -55,12 +46,7 @@ func (h *SyncHandler) DeltaSync(c fiber.Ctx) error {
 func (h *SyncHandler) FullSync(c fiber.Ctx) error {
 	resp, err := h.svc.FullSync(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to fetch full sync",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to fetch full sync")
 	}
 
 	return c.JSON(resp)

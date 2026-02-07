@@ -7,21 +7,22 @@ BASE_URL="${1:?Usage: $0 <base_url>}"
 
 echo -e "\n${CYAN}── Channel Endpoints ──${NC}"
 
-# GET /api/channels/:channelId — not found
+# GET /api/channels/:channelId — not found (valid format)
 echo "GET /api/channels/nonexistent"
-do_request GET "$BASE_URL/api/channels/UC_nonexistent_channel_12345"
+do_request GET "$BASE_URL/api/channels/UCnonexistent12345"
 assert_status "nonexistent channel returns 404" 404 "$RESP_STATUS"
 
 echo -e "\n${CYAN}── User Endpoints ──${NC}"
 
-# GET /api/users/:userId — not found
+# GET /api/users/:userId — not found (valid hex format)
 echo "GET /api/users/nonexistent"
-do_request GET "$BASE_URL/api/users/nonexistent_user_12345"
+do_request GET "$BASE_URL/api/users/deadbeef12345678"
 assert_status "nonexistent user returns 404" 404 "$RESP_STATUS"
 
 # Create a user by submitting a vote, then check their profile
-TEST_USER="tuch$(date +%s)"
-TEST_VIDEO="tvch$(date +%s)"
+TS=$(date +%s)
+TEST_USER=$(printf '%012x' "$TS")
+TEST_VIDEO="vc${TS: -9}"
 
 echo "POST /api/votes — create test user"
 do_request POST "$BASE_URL/api/votes" "{\"videoId\":\"$TEST_VIDEO\",\"userId\":\"$TEST_USER\",\"category\":\"ai_visuals\",\"userAgent\":\"contract-test/1.0\"}"

@@ -3,9 +3,9 @@ from typing import Annotated
 
 import asyncpg
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 
 from app.dependencies import get_cache, get_db
+from app.middleware.validation import error_response, validate_channel_id
 from app.services.cache_service import CacheService
 from app.services import channel_service
 
@@ -20,6 +20,10 @@ async def get_by_channel_id(
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
     cache: Annotated[CacheService, Depends(get_cache)],
 ):
+    channel_id, err = validate_channel_id(channel_id)
+    if err:
+        return error_response(400, "INVALID_FIELD", err)
+
     # Cache-aside: check cache first
     cached = await cache.get_channel(channel_id)
     if cached is not None:
@@ -29,26 +33,10 @@ async def get_by_channel_id(
         resp = await channel_service.lookup(pool, channel_id)
     except Exception:
         logger.exception("Failed to lookup channel")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to lookup channel",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to lookup channel")
 
     if resp is None:
-        return JSONResponse(
-            status_code=404,
-            content={
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "Channel not found",
-                }
-            },
-        )
+        return error_response(404, "NOT_FOUND", "Channel not found")
 
     result = resp.model_dump(by_alias=True)
     await cache.set_channel(channel_id, result)

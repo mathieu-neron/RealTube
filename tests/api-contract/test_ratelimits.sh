@@ -19,11 +19,12 @@ assert_header_exists "X-RateLimit-Reset present" "$RESP_HEADERS" "X-RateLimit-Re
 echo -e "\n${CYAN}── Rate Limit Enforcement (Vote Submit) ──${NC}"
 
 # Rapid-fire 12 vote submissions to trigger 429 (limit is 10/min)
-TEST_USER="rl$(date +%s)"
+# Use hex userId and short alphanumeric videoId that pass validation
+TEST_USER=$(printf '%012x' "$(date +%s)")
 hit_429=false
 echo "Sending 12 rapid vote submissions..."
 for i in $(seq 1 12); do
-  do_request POST "$BASE_URL/api/votes" "{\"videoId\":\"rl_test_$i\",\"userId\":\"$TEST_USER\",\"category\":\"fully_ai\",\"userAgent\":\"rate-test\"}"
+  do_request POST "$BASE_URL/api/votes" "{\"videoId\":\"rl${i}test\",\"userId\":\"$TEST_USER\",\"category\":\"fully_ai\",\"userAgent\":\"rate-test\"}"
   if [ "$RESP_STATUS" = "429" ]; then
     echo -e "  ${GREEN}✓${NC} Got 429 on request #$i"
     PASS=$((PASS + 1))
@@ -40,7 +41,7 @@ fi
 
 # Cleanup test votes (best-effort, may fail due to rate limit)
 for i in $(seq 1 12); do
-  do_request DELETE "$BASE_URL/api/votes" "{\"videoId\":\"rl_test_$i\",\"userId\":\"$TEST_USER\"}" || true
+  do_request DELETE "$BASE_URL/api/votes" "{\"videoId\":\"rl${i}test\",\"userId\":\"$TEST_USER\"}" || true
 done
 
 print_summary

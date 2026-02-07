@@ -5,9 +5,9 @@ from typing import Annotated
 
 import asyncpg
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 
 from app.dependencies import get_db
+from app.middleware.validation import error_response, validate_user_id
 from app.models.user import UserResponse
 
 logger = logging.getLogger(__name__)
@@ -27,30 +27,18 @@ async def get_by_user_id(
     user_id: str,
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
 ):
+    user_id, err = validate_user_id(user_id)
+    if err:
+        return error_response(400, "INVALID_FIELD", err)
+
     try:
         row = await pool.fetchrow(FIND_BY_USER_ID, user_id)
     except Exception:
         logger.exception("Failed to lookup user")
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to lookup user",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to lookup user")
 
     if row is None:
-        return JSONResponse(
-            status_code=404,
-            content={
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "User not found",
-                }
-            },
-        )
+        return error_response(404, "NOT_FOUND", "User not found")
 
     first_seen: datetime = row["first_seen"]
     if first_seen.tzinfo is None:

@@ -2,9 +2,13 @@ from typing import Annotated
 
 import asyncpg
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
 
 from app.dependencies import get_cache, get_db
+from app.middleware.validation import (
+    error_response,
+    validate_hash_prefix,
+    validate_video_id,
+)
 from app.services.cache_service import CacheService
 from app.services import video_service
 
@@ -16,40 +20,17 @@ async def get_by_hash_prefix(
     hash_prefix: str,
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
 ):
-    if len(hash_prefix) < 4 or len(hash_prefix) > 8:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": {
-                    "code": "INVALID_PREFIX",
-                    "message": "Hash prefix must be 4-8 characters",
-                }
-            },
-        )
+    prefix, err = validate_hash_prefix(hash_prefix)
+    if err:
+        return error_response(400, "INVALID_PREFIX", err)
 
     try:
-        videos = await video_service.lookup_by_hash_prefix(pool, hash_prefix)
+        videos = await video_service.lookup_by_hash_prefix(pool, prefix)
     except Exception:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to lookup videos",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to lookup videos")
 
     if not videos:
-        return JSONResponse(
-            status_code=404,
-            content={
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "No flagged videos matching prefix",
-                }
-            },
-        )
+        return error_response(404, "NOT_FOUND", "No flagged videos matching prefix")
 
     return [v.model_dump(by_alias=True, exclude_none=True) for v in videos]
 
@@ -60,46 +41,23 @@ async def get_by_video_id(
     cache: Annotated[CacheService, Depends(get_cache)],
     videoId: Annotated[str | None, Query()] = None,
 ):
-    if not videoId:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "error": {
-                    "code": "MISSING_PARAM",
-                    "message": "videoId query parameter is required",
-                }
-            },
-        )
+    video_id, err = validate_video_id(videoId or "")
+    if err:
+        return error_response(400, "INVALID_FIELD", err)
 
     # Cache-aside: check cache first
-    cached = await cache.get_video(videoId)
+    cached = await cache.get_video(video_id)
     if cached is not None:
         return cached
 
     try:
-        video = await video_service.lookup_by_video_id(pool, videoId)
+        video = await video_service.lookup_by_video_id(pool, video_id)
     except Exception:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "INTERNAL_ERROR",
-                    "message": "Failed to lookup video",
-                }
-            },
-        )
+        return error_response(500, "INTERNAL_ERROR", "Failed to lookup video")
 
     if video is None:
-        return JSONResponse(
-            status_code=404,
-            content={
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "Video not found",
-                }
-            },
-        )
+        return error_response(404, "NOT_FOUND", "Video not found")
 
     result = video.model_dump(by_alias=True, exclude_none=True)
-    await cache.set_video(videoId, result)
+    await cache.set_video(video_id, result)
     return result

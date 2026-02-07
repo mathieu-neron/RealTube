@@ -68,7 +68,7 @@ Last updated: 2026-02-07
 | 40 | Database Export Service | done | 2026-02-07 | scripts/db-export.sh (privacy-filtered: excludes ip_hashes/vip_actions data, NULLs ip_hash in votes, zeros shadowban in users); Go export.go + Python export.py serve latest .sql.gz; db-exporter uses script; both backends verified (HTTP 200, 3.3KB gzip) |
 | 41 | Channel Auto-Flag Background Job | done | 2026-02-07 | Go channel_worker.go + Python channel_worker.py; 15-min periodic tick; recalculates all channel scores; sets auto_flag_new when score>=80, flagged>=20, not locked; applies preliminary score 60 to new videos from auto-flagged channels; wired into main.go (goroutine) and main.py (asyncio task); verified: channel score=90, auto_flag=true, new video score=60 |
 | 42 | Async Score Recalculation Worker | done | 2026-02-07 | Go score_worker.go + Python score_worker.py; PG LISTEN/NOTIFY on vote_changes; 5s batch window deduplicates video IDs; manual pg_notify on vote DELETE; vote_svc no longer blocks on recalculation; both workers verified (batch logs + DB score updates) |
-| 43 | Security Hardening - Input Validation | pending | | |
+| 43 | Security Hardening - Input Validation | done | 2026-02-07 | Go validation.go (regex + length checks) + Python validation.py; ErrorResponse helper standardizes all error JSON; validators for videoId, userId, channelId, hashPrefix, userAgent; contract tests updated to use valid test IDs; Go 59 pass, Python 61 pass |
 | 44 | Extension - Shorts Support | pending | | |
 | 45 | Extension - Offline Vote Queue | pending | | |
 | 46 | Structured Logging (Both Backends) | pending | | |
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 42
+- **Completed:** 43
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 6
+- **Pending:** 5

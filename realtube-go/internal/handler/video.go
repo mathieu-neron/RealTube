@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
 )
 
@@ -19,33 +20,18 @@ func NewVideoHandler(svc *service.VideoService) *VideoHandler {
 
 // GetByHashPrefix handles GET /api/videos/:hashPrefix
 func (h *VideoHandler) GetByHashPrefix(c fiber.Ctx) error {
-	prefix := c.Params("hashPrefix")
-	if len(prefix) < 4 || len(prefix) > 8 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INVALID_PREFIX",
-				"message": "Hash prefix must be 4-8 characters",
-			},
-		})
+	prefix, errMsg := middleware.ValidateHashPrefix(c.Params("hashPrefix"))
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_PREFIX", errMsg)
 	}
 
 	videos, err := h.svc.LookupByHashPrefix(c.Context(), prefix)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to lookup videos",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to lookup videos")
 	}
 
 	if len(videos) == 0 {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "NOT_FOUND",
-				"message": "No flagged videos matching prefix",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusNotFound, "NOT_FOUND", "No flagged videos matching prefix")
 	}
 
 	return c.JSON(videos)
@@ -53,32 +39,17 @@ func (h *VideoHandler) GetByHashPrefix(c fiber.Ctx) error {
 
 // GetByVideoID handles GET /api/videos?videoId=X
 func (h *VideoHandler) GetByVideoID(c fiber.Ctx) error {
-	videoID := fiber.Query[string](c, "videoId")
-	if videoID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "MISSING_PARAM",
-				"message": "videoId query parameter is required",
-			},
-		})
+	videoID, errMsg := middleware.ValidateVideoID(fiber.Query[string](c, "videoId"))
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
 	}
 
 	video, err := h.svc.LookupByVideoID(c.Context(), videoID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": fiber.Map{
-					"code":    "NOT_FOUND",
-					"message": "Video not found",
-				},
-			})
+			return middleware.ErrorResponse(c, fiber.StatusNotFound, "NOT_FOUND", "Video not found")
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to lookup video",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to lookup video")
 	}
 
 	return c.JSON(video)

@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
+
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 )
 
 type ExportHandler struct {
@@ -22,12 +24,7 @@ func NewExportHandler(exportDir string) *ExportHandler {
 func (h *ExportHandler) Export(c fiber.Ctx) error {
 	entries, err := os.ReadDir(h.exportDir)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to read export directory",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to read export directory")
 	}
 
 	// Find the latest .sql.gz file
@@ -39,12 +36,7 @@ func (h *ExportHandler) Export(c fiber.Ctx) error {
 	}
 
 	if len(files) == 0 {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "NOT_FOUND",
-				"message": "No export file available yet",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusNotFound, "NOT_FOUND", "No export file available yet")
 	}
 
 	// Sort lexicographically — filenames contain YYYYMMDD so latest is last

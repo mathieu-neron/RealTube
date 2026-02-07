@@ -6,14 +6,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/helpers.sh"
 BASE_URL="${1:?Usage: $0 <base_url>}"
 
-TEST_VIDEO="tv$(date +%s)"
-TEST_USER="tu$(date +%s)"
+# Use hex user IDs and short alphanumeric video IDs that pass validation
+TS=$(date +%s)
+# Truncate to fit VARCHAR(16): "v" + last 9 digits of epoch
+TEST_VIDEO="v${TS: -9}"
+# Hex user ID (last 10 hex digits of epoch as hex)
+TEST_USER=$(printf '%010x' "$TS")
 
 echo -e "\n${CYAN}── Vote Endpoints ──${NC}"
 
 # POST /api/votes — missing fields
 echo "POST /api/votes — missing fields"
-do_request POST "$BASE_URL/api/votes" '{}'
+do_request POST "$BASE_URL/api/votes" '{"videoId":"","userId":"","category":""}'
 assert_status "empty body returns 400" 400 "$RESP_STATUS"
 
 # POST /api/votes — invalid category
@@ -46,7 +50,7 @@ assert_json_exists "has categories" "$RESP_BODY" "d.get('categories')"
 
 # DELETE /api/votes — missing fields
 echo "DELETE /api/votes — missing fields"
-do_request DELETE "$BASE_URL/api/votes" '{}'
+do_request DELETE "$BASE_URL/api/votes" '{"videoId":"","userId":""}'
 assert_status "empty delete returns 400" 400 "$RESP_STATUS"
 
 # DELETE /api/votes — valid deletion

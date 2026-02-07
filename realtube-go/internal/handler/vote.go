@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/mathieu-neron/RealTube/realtube-go/internal/middleware"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/model"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/repository"
 	"github.com/mathieu-neron/RealTube/realtube-go/internal/service"
@@ -24,53 +25,45 @@ func NewVoteHandler(svc *service.VoteService) *VoteHandler {
 func (h *VoteHandler) Submit(c fiber.Ctx) error {
 	var req model.VoteRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INVALID_BODY",
-				"message": "Invalid request body",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_BODY", "Invalid request body")
 	}
 
-	if req.VideoID == "" || req.UserID == "" || req.Category == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "MISSING_FIELDS",
-				"message": "videoId, userId, and category are required",
-			},
-		})
+	// Validate videoId
+	videoID, errMsg := middleware.ValidateVideoID(req.VideoID)
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
 	}
+	req.VideoID = videoID
 
+	// Validate userId
+	userID, errMsg := middleware.ValidateUserID(req.UserID)
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
+	}
+	req.UserID = userID
+
+	// Validate category
+	if req.Category == "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "MISSING_FIELDS", "videoId, userId, and category are required")
+	}
 	if !repository.ValidCategories[req.Category] {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INVALID_CATEGORY",
-				"message": "Invalid category. Must be one of: fully_ai, ai_voiceover, ai_visuals, ai_thumbnails, ai_assisted",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_CATEGORY",
+			"Invalid category. Must be one of: fully_ai, ai_voiceover, ai_visuals, ai_thumbnails, ai_assisted")
 	}
 
-	// Extract IP for abuse tracking (hash it server-side)
+	// Sanitize optional userAgent
+	req.UserAgent = middleware.ValidateUserAgent(req.UserAgent)
+
+	// Extract IP for abuse tracking
 	ip := c.IP()
-	// Simple hash for now; will be properly salted in security hardening step
 	ipHash := ip
 
 	resp, err := h.svc.Submit(c.Context(), req, ipHash)
 	if err != nil {
 		if strings.Contains(err.Error(), "invalid category") {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fiber.Map{
-					"code":    "INVALID_CATEGORY",
-					"message": err.Error(),
-				},
-			})
+			return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_CATEGORY", err.Error())
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to submit vote",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to submit vote")
 	}
 
 	return c.JSON(resp)
@@ -80,39 +73,29 @@ func (h *VoteHandler) Submit(c fiber.Ctx) error {
 func (h *VoteHandler) Delete(c fiber.Ctx) error {
 	var req model.VoteDeleteRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INVALID_BODY",
-				"message": "Invalid request body",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_BODY", "Invalid request body")
 	}
 
-	if req.VideoID == "" || req.UserID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "MISSING_FIELDS",
-				"message": "videoId and userId are required",
-			},
-		})
+	// Validate videoId
+	videoID, errMsg := middleware.ValidateVideoID(req.VideoID)
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
 	}
+	req.VideoID = videoID
+
+	// Validate userId
+	userID, errMsg := middleware.ValidateUserID(req.UserID)
+	if errMsg != "" {
+		return middleware.ErrorResponse(c, fiber.StatusBadRequest, "INVALID_FIELD", errMsg)
+	}
+	req.UserID = userID
 
 	err := h.svc.Delete(c.Context(), req)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": fiber.Map{
-					"code":    "NOT_FOUND",
-					"message": "Vote not found",
-				},
-			})
+			return middleware.ErrorResponse(c, fiber.StatusNotFound, "NOT_FOUND", "Vote not found")
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fiber.Map{
-				"code":    "INTERNAL_ERROR",
-				"message": "Failed to delete vote",
-			},
-		})
+		return middleware.ErrorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Failed to delete vote")
 	}
 
 	return c.JSON(fiber.Map{"success": true})
