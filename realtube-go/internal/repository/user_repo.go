@@ -35,6 +35,14 @@ func (r *UserRepo) FindByUserID(ctx context.Context, userID string) (*model.User
 	return &u, nil
 }
 
+// CreateIfNotExists inserts a new user with default values if one doesn't already exist.
+func (r *UserRepo) CreateIfNotExists(ctx context.Context, userID string) error {
+	_, err := r.pool.Exec(ctx, `
+		INSERT INTO users (user_id) VALUES ($1)
+		ON CONFLICT (user_id) DO NOTHING`, userID)
+	return err
+}
+
 // GetStats returns aggregate statistics from all tables.
 func (r *UserRepo) GetStats(ctx context.Context) (*model.StatsResponse, error) {
 	query := `

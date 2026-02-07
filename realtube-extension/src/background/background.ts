@@ -19,7 +19,8 @@ export type MessageType =
   | "SYNC_DELTA"
   | "SYNC_FULL"
   | "GET_SYNC_STATUS"
-  | "FLUSH_PENDING_VOTES";
+  | "FLUSH_PENDING_VOTES"
+  | "OPEN_POPUP";
 
 export interface Message {
   type: MessageType;
@@ -191,6 +192,11 @@ async function handleMessage(
     case "FLUSH_PENDING_VOTES": {
       const flushResult = await flushPendingVotes();
       return { success: true, data: flushResult };
+    }
+
+    case "OPEN_POPUP": {
+      await chrome.action.openPopup();
+      return { success: true };
     }
 
     case "GET_STATUS": {

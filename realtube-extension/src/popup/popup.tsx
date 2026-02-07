@@ -206,7 +206,7 @@ function CurrentVideoInfo({ video }: { video: CachedVideo | null }) {
   }
 
   const verdict = scoreVerdict(video.score);
-  const catEntries = Object.entries(video.categories).sort(
+  const catEntries = Object.entries(video.categories || {}).sort(
     (a, b) => b[1].weightedScore - a[1].weightedScore
   );
   const maxScore = catEntries.length > 0 ? Math.max(...catEntries.map(([, c]) => c.weightedScore)) : 1;

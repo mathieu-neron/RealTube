@@ -14,10 +14,12 @@ assert_status "nonexistent channel returns 404" 404 "$RESP_STATUS"
 
 echo -e "\n${CYAN}── User Endpoints ──${NC}"
 
-# GET /api/users/:userId — not found (valid hex format)
-echo "GET /api/users/nonexistent"
+# GET /api/users/:userId — unknown user auto-created with defaults
+echo "GET /api/users/new-user"
 do_request GET "$BASE_URL/api/users/deadbeef12345678"
-assert_status "nonexistent user returns 404" 404 "$RESP_STATUS"
+assert_status "unknown user auto-created returns 200" 200 "$RESP_STATUS"
+assert_json_field "auto-created userId matches" "$RESP_BODY" "['userId']" "deadbeef12345678"
+assert_json_exists "has default trustScore" "$RESP_BODY" "d.get('trustScore')"
 
 # Create a user by submitting a vote, then check their profile
 TS=$(date +%s)

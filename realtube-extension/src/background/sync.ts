@@ -10,6 +10,7 @@ const META_LAST_DELTA_SYNC = "lastDeltaSync";
 const META_LAST_FULL_SYNC = "lastFullSync";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
+let startupSyncTimer: ReturnType<typeof setTimeout> | null = null;
 
 /** Perform a delta sync: fetch changes since last sync timestamp. */
 export async function performDeltaSync(): Promise<{
@@ -23,7 +24,16 @@ export async function performDeltaSync(): Promise<{
 
   console.log(`RealTube sync: delta since ${since}`);
 
-  const data = await api.syncDelta(since);
+  let data: api.SyncDeltaResponse;
+  try {
+    data = await api.syncDelta(since);
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("429")) {
+      console.warn("RealTube sync: delta rate-limited, will retry next cycle");
+      return { videosUpdated: 0, videosRemoved: 0, channelsUpdated: 0, channelsRemoved: 0 };
+    }
+    throw err;
+  }
 
   let videosUpdated = 0;
   let videosRemoved = 0;
@@ -84,7 +94,16 @@ export async function performFullSync(): Promise<{
 }> {
   console.log("RealTube sync: full refresh starting");
 
-  const data = await api.syncFull();
+  let data: api.SyncFullResponse;
+  try {
+    data = await api.syncFull();
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("429")) {
+      console.warn("RealTube sync: full sync rate-limited, will retry next cycle");
+      return { videoCount: 0, channelCount: 0 };
+    }
+    throw err;
+  }
 
   // Clear existing cache
   await cache.clearVideos();
@@ -143,8 +162,12 @@ async function autoSync(): Promise<void> {
 export function startSyncSchedule(): void {
   if (syncTimer) return;
 
-  // Run an initial sync shortly after startup
-  setTimeout(() => autoSync(), 5000);
+  // Debounce the initial sync — cancel any pending startup sync from a previous call
+  if (startupSyncTimer) clearTimeout(startupSyncTimer);
+  startupSyncTimer = setTimeout(() => {
+    startupSyncTimer = null;
+    autoSync();
+  }, 5000);
 
   // Schedule periodic delta syncs
   syncTimer = setInterval(() => autoSync(), DELTA_SYNC_INTERVAL_MS);

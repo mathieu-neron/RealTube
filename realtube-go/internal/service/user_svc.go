@@ -36,6 +36,21 @@ func (s *UserService) Lookup(ctx context.Context, userID string) (*model.UserRes
 	}, nil
 }
 
+// LookupOrCreate returns the user response, auto-creating a default user if not found.
+func (s *UserService) LookupOrCreate(ctx context.Context, userID string) (*model.UserResponse, error) {
+	resp, err := s.Lookup(ctx, userID)
+	if err == nil {
+		return resp, nil
+	}
+
+	// Auto-create user with defaults
+	if err := s.repo.CreateIfNotExists(ctx, userID); err != nil {
+		return nil, err
+	}
+
+	return s.Lookup(ctx, userID)
+}
+
 // GetStats returns aggregate platform statistics.
 func (s *UserService) GetStats(ctx context.Context) (*model.StatsResponse, error) {
 	return s.repo.GetStats(ctx)

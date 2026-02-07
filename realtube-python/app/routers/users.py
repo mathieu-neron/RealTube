@@ -21,6 +21,11 @@ FIND_BY_USER_ID = """
     WHERE user_id = $1
 """
 
+CREATE_IF_NOT_EXISTS = """
+    INSERT INTO users (user_id) VALUES ($1)
+    ON CONFLICT (user_id) DO NOTHING
+"""
+
 
 @router.get("/{user_id}")
 async def get_by_user_id(
@@ -33,12 +38,15 @@ async def get_by_user_id(
 
     try:
         row = await pool.fetchrow(FIND_BY_USER_ID, user_id)
+        if row is None:
+            await pool.execute(CREATE_IF_NOT_EXISTS, user_id)
+            row = await pool.fetchrow(FIND_BY_USER_ID, user_id)
     except Exception:
         logger.exception("Failed to lookup user")
         return error_response(500, "INTERNAL_ERROR", "Failed to lookup user")
 
     if row is None:
-        return error_response(404, "NOT_FOUND", "User not found")
+        return error_response(500, "INTERNAL_ERROR", "Failed to create user")
 
     first_seen: datetime = row["first_seen"]
     if first_seen.tzinfo is None:
