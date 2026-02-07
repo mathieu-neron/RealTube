@@ -57,7 +57,7 @@ Last updated: 2026-02-07
 | 34 | Extension - IndexedDB Cache Layer | done | 2026-02-07 | cache.ts: 4 object stores (videos, channels, pendingVotes, meta); CRUD + batch ops. sync.ts: delta (30min) + full (24h) + auto-sync schedule. background.ts: 4 new message types (CHECK_VIDEOS, SYNC_DELTA, SYNC_FULL, GET_SYNC_STATUS); cache-first lookup pattern |
 | 35 | Extension - Content Script (Video Detection & Hiding) | done | 2026-02-07 | dom-utils.ts: page type detection (6 types), video ID extraction from 5 renderer types + URL parsing. hide.ts: cache-first check via CHECK_VIDEOS message, threshold-based hiding with display:none. content.ts: init + MutationObserver (debounced 100ms) + SPA navigation (yt-navigate-finish) + settings listener |
 | 36 | Extension - Vote Submission UI | done | 2026-02-07 | vote-ui.ts + vote-ui.css; "Flag AI" button injected into #top-level-buttons-computed; overlay with 5 categories, custom radio animations, submit/cancel/click-outside-close; success/error feedback with auto-close; content.ts updated to inject on watch pages and remove on navigation; CSS extracted to content.css (5.91 KiB) |
-| 37 | Extension - Popup UI (React) | pending | | |
+| 37 | Extension - Popup UI (React) | done | 2026-02-07 | popup.tsx (React 19) + popup.css; 5 sections: StatusBar (toggle+connection dot), CurrentVideoInfo (score ring+category bars), QuickVote (5 category buttons), UserStats (trust/votes/accuracy cards), CacheInfo (counts+sync button); parallel data fetch on mount; popup.js 195 KiB, popup.css 11.2 KiB |
 | 38 | Extension - Options Page (React) | pending | | |
 
 ## Phase 5: Hardening & Public API
@@ -78,7 +78,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 48
-- **Completed:** 36
+- **Completed:** 37
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 12
+- **Pending:** 11
