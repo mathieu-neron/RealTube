@@ -4,7 +4,8 @@ import asyncpg
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
-from app.dependencies import get_db
+from app.dependencies import get_cache, get_db
+from app.services.cache_service import CacheService
 from app.services import video_service
 
 router = APIRouter(prefix="/api/videos", tags=["videos"])
@@ -56,6 +57,7 @@ async def get_by_hash_prefix(
 @router.get("")
 async def get_by_video_id(
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
+    cache: Annotated[CacheService, Depends(get_cache)],
     videoId: Annotated[str | None, Query()] = None,
 ):
     if not videoId:
@@ -68,6 +70,11 @@ async def get_by_video_id(
                 }
             },
         )
+
+    # Cache-aside: check cache first
+    cached = await cache.get_video(videoId)
+    if cached is not None:
+        return cached
 
     try:
         video = await video_service.lookup_by_video_id(pool, videoId)
@@ -93,4 +100,6 @@ async def get_by_video_id(
             },
         )
 
-    return video.model_dump(by_alias=True, exclude_none=True)
+    result = video.model_dump(by_alias=True, exclude_none=True)
+    await cache.set_video(videoId, result)
+    return result

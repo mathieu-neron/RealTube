@@ -5,8 +5,9 @@ import asyncpg
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
-from app.dependencies import get_db
+from app.dependencies import get_cache, get_db
 from app.models.vote import VoteDeleteRequest, VoteRequest
+from app.services.cache_service import CacheService
 from app.services.vote_service import VALID_CATEGORIES, delete_vote, submit_vote
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/api/votes", tags=["votes"])
 async def submit(
     request: Request,
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
+    cache: Annotated[CacheService, Depends(get_cache)],
 ):
     try:
         body = await request.json()
@@ -86,6 +88,9 @@ async def submit(
             },
         )
 
+    # Invalidate caches after successful vote
+    await cache.invalidate_video(req.video_id)
+
     return resp.model_dump(by_alias=True)
 
 
@@ -93,6 +98,7 @@ async def submit(
 async def delete(
     request: Request,
     pool: Annotated[asyncpg.Pool, Depends(get_db)],
+    cache: Annotated[CacheService, Depends(get_cache)],
 ):
     try:
         body = await request.json()
@@ -154,5 +160,8 @@ async def delete(
                 }
             },
         )
+
+    # Invalidate caches after successful vote delete
+    await cache.invalidate_video(req.video_id)
 
     return {"success": True}
