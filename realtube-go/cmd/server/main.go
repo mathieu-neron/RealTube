@@ -66,6 +66,13 @@ func main() {
 	app := fiber.New(fiber.Config{
 		AppName:      "RealTube API",
 		ServerHeader: "RealTube",
+		// Trusted proxy: NGINX sits in front, forwarding client IP via X-Forwarded-For.
+		// Without this, attackers can spoof IPs to bypass rate limiting.
+		TrustProxy:   true,
+		ProxyHeader:  "X-Real-IP",
+		TrustProxyConfig: fiber.TrustProxyConfig{
+			Proxies: []string{"172.16.0.0/12"}, // Docker internal network
+		},
 	})
 
 	router.Setup(app, handlers, cfg.CORSOrigins)
