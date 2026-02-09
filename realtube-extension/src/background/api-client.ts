@@ -1,12 +1,22 @@
 // API client with retry/exponential backoff for communicating with RealTube server
 
-const DEFAULT_BASE_URL = "http://localhost";
+const DEFAULT_BASE_URL = "https://localhost";
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
 export interface ApiClientConfig {
   baseUrl: string;
 }
+
+// Cache the resolved base URL to avoid repeated storage reads
+let cachedBaseUrl: string | null = null;
+
+// Listen for storage changes to invalidate the cache
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "sync" && changes.serverUrl) {
+    cachedBaseUrl = null;
+  }
+});
 
 export interface VoteRequest {
   videoId: string;
@@ -68,8 +78,23 @@ export interface UserInfoResponse {
   isVip: boolean;
 }
 
-function getConfig(): ApiClientConfig {
-  return { baseUrl: DEFAULT_BASE_URL };
+async function getConfig(): Promise<ApiClientConfig> {
+  if (cachedBaseUrl) {
+    return { baseUrl: cachedBaseUrl };
+  }
+
+  const items = await chrome.storage.sync.get("serverUrl");
+  const url = items.serverUrl || DEFAULT_BASE_URL;
+
+  // Allow http only for localhost (development). Enforce https otherwise.
+  if (!url.startsWith("https://") && !url.match(/^http:\/\/localhost(:\d+)?/)) {
+    console.warn("RealTube: non-HTTPS server URL rejected, using default:", url);
+    cachedBaseUrl = DEFAULT_BASE_URL;
+  } else {
+    cachedBaseUrl = url;
+  }
+
+  return { baseUrl: cachedBaseUrl! };
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -117,7 +142,7 @@ async function fetchWithRetry(
 export async function lookupVideosByPrefix(
   hashPrefix: string
 ): Promise<VideoResult[]> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(
     `${baseUrl}/api/videos/${encodeURIComponent(hashPrefix)}`
   );
@@ -128,7 +153,7 @@ export async function lookupVideosByPrefix(
 
 /** Submit a vote. */
 export async function submitVote(vote: VoteRequest): Promise<VoteResponse> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(`${baseUrl}/api/votes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -146,7 +171,7 @@ export async function deleteVote(
   videoId: string,
   userId: string
 ): Promise<void> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(`${baseUrl}/api/votes`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
@@ -162,7 +187,7 @@ export async function deleteVote(
 
 /** Fetch delta sync changes since timestamp. */
 export async function syncDelta(since: string): Promise<SyncDeltaResponse> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(
     `${baseUrl}/api/sync/delta?since=${encodeURIComponent(since)}`
   );
@@ -172,7 +197,7 @@ export async function syncDelta(since: string): Promise<SyncDeltaResponse> {
 
 /** Fetch full cache blob. */
 export async function syncFull(): Promise<SyncFullResponse> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(`${baseUrl}/api/sync/full`);
   if (!response.ok) throw new Error(`Sync full failed: ${response.status}`);
   return response.json();
@@ -180,7 +205,7 @@ export async function syncFull(): Promise<SyncFullResponse> {
 
 /** Fetch user info. */
 export async function getUserInfo(userId: string): Promise<UserInfoResponse> {
-  const { baseUrl } = getConfig();
+  const { baseUrl } = await getConfig();
   const response = await fetchWithRetry(
     `${baseUrl}/api/users/${encodeURIComponent(userId)}`
   );
