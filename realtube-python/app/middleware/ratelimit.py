@@ -22,12 +22,20 @@ class _Entry:
 class RateLimiter:
     """Fixed-window rate limiter with configurable key function."""
 
+    _MAX_ENTRIES = 10000  # Evict expired entries when dict exceeds this size
+
     def __init__(self, max_requests: int, window_seconds: float, key_fn: Callable[[Request], str]):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.key_fn = key_fn
         self._entries: dict[str, _Entry] = {}
         self._lock = asyncio.Lock()
+
+    def _evict_expired(self, now: float) -> None:
+        """Remove expired entries from the dict. Called under lock."""
+        expired = [k for k, e in self._entries.items() if now >= e.window_end]
+        for k in expired:
+            del self._entries[k]
 
     async def check(self, request: Request) -> tuple[bool, int, int, int]:
         """Check if request is allowed.
@@ -38,6 +46,10 @@ class RateLimiter:
         now = time.time()
 
         async with self._lock:
+            # Evict expired entries when dict grows too large
+            if len(self._entries) > self._MAX_ENTRIES:
+                self._evict_expired(now)
+
             entry = self._entries.get(key)
             if entry is None or now >= entry.window_end:
                 entry = _Entry(count=1, window_end=now + self.window_seconds)
