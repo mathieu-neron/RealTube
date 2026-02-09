@@ -34,7 +34,7 @@ Last updated: 2026-02-09
 |------|------------|--------|------|-------|
 | S17 | Health Endpoint — Sanitize Error Messages | done | 2026-02-09 | Replaced err.Error()/str(e) with generic "connection failed" in both Go and Python health checks |
 | S18 | Rate Limiter Memory Cleanup | done | 2026-02-09 | Python: evicts expired entries when dict > 10000 keys; Go already has 5-min cleanup goroutine |
-| S19 | Container Security Constraints | pending | | |
+| S19 | Container Security Constraints | done | 2026-02-09 | Added no-new-privileges + cap_drop ALL to go-backend, python-backend, db-exporter |
 | S20 | Extension — Remove Excessive Host Permission | pending | | |
 | S21 | Extension — Update React to Patched Version | pending | | |
 | S22 | Extension — Restrict User ID Exposure | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-09
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 18
+- **Completed:** 19
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 5
+- **Pending:** 4

@@ -69,6 +69,10 @@ services:
     build:
       context: ./realtube-go
       dockerfile: Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-realtube}
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
@@ -104,6 +108,10 @@ services:
     build:
       context: ./realtube-python
       dockerfile: Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-realtube}
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
@@ -137,6 +145,10 @@ services:
 
   db-exporter:
     image: postgres:16-alpine
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       PGHOST: postgres
       PGUSER: ${POSTGRES_USER:-realtube}
