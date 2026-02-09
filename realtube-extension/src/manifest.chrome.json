@@ -6,7 +6,6 @@
   "permissions": ["storage", "scripting"],
   "host_permissions": [
     "*://www.youtube.com/*",
-    "*://youtube.com/*",
     "*://m.youtube.com/*"
   ],
   "background": {
