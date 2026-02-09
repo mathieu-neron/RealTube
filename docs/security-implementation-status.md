@@ -23,7 +23,7 @@ Last updated: 2026-02-09
 | S10 | Request Body Size Limit + Timeouts (Go) | done | 2026-02-09 | BodyLimit 1MB, ReadTimeout 10s, WriteTimeout 30s. 2MB payload returns 413. |
 | S11 | Path Traversal Protection in Export Handlers | done | 2026-02-09 | Regex filename validation + symlink-resolving path containment check in both Go and Python |
 | S12 | Remove DB/Redis Port Exposure | done | 2026-02-09 | Removed ports: sections from postgres and redis services; accessible only via Docker internal network |
-| S13 | NGINX — TLS/HTTPS + Security Headers | pending | | |
+| S13 | NGINX — TLS/HTTPS + Security Headers | done | 2026-02-09 | Self-signed cert for dev; HTTP→HTTPS 301 redirect; TLS 1.2/1.3; X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, HSTS 1yr |
 | S14 | Restrict CORS Origins in Docker Compose | pending | | |
 | S15 | Extension — Replace innerHTML with Safe DOM APIs | pending | | |
 | S16 | Python — Disable Debug Reload in Production | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-09
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 12
+- **Completed:** 13
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 11
+- **Pending:** 10
