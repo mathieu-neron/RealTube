@@ -36,14 +36,14 @@ Last updated: 2026-02-09
 | S18 | Rate Limiter Memory Cleanup | done | 2026-02-09 | Python: evicts expired entries when dict > 10000 keys; Go already has 5-min cleanup goroutine |
 | S19 | Container Security Constraints | done | 2026-02-09 | Added no-new-privileges + cap_drop ALL to go-backend, python-backend, db-exporter |
 | S20 | Extension — Remove Excessive Host Permission | done | 2026-02-09 | Removed *://youtube.com/* from host_permissions; only www and m subdomains remain |
-| S21 | Extension — Update React to Patched Version | pending | | |
+| S21 | Extension — Update React to Patched Version | done | 2026-02-09 | Updated to ^19.0.1; resolved to 19.2.4; npm audit: 0 vulnerabilities |
 | S22 | Extension — Restrict User ID Exposure | pending | | |
 | S23 | Database Connection Encryption | pending | | |
 
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 20
+- **Completed:** 21
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 3
+- **Pending:** 2
