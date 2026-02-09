@@ -26,7 +26,7 @@ Last updated: 2026-02-09
 | S13 | NGINX — TLS/HTTPS + Security Headers | done | 2026-02-09 | Self-signed cert for dev; HTTP→HTTPS 301 redirect; TLS 1.2/1.3; X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy no-referrer, HSTS 1yr |
 | S14 | Restrict CORS Origins in Docker Compose | done | 2026-02-09 | Origins restricted to chrome-extension://, moz-extension://, https://localhost, http://localhost:*; Go uses AllowOriginsFunc, Python uses allow_origin_regex; both warn on wildcard CORS in production |
 | S15 | Extension — Replace innerHTML with Safe DOM APIs | done | 2026-02-09 | SVG parsed via DOMParser + adoptNode; labels use createElement/textContent; zero innerHTML in extension src |
-| S16 | Python — Disable Debug Reload in Production | pending | | |
+| S16 | Python — Disable Debug Reload in Production | done | 2026-02-09 | reload=True only when ENVIRONMENT=development; disabled in production |
 
 ## Phase 3: Medium (Hardening Before v1.0)
 
@@ -43,7 +43,7 @@ Last updated: 2026-02-09
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 15
+- **Completed:** 16
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 8
+- **Pending:** 7

@@ -99,4 +99,9 @@ app.include_router(metrics.router)
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=settings.port, reload=True)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=settings.port,
+        reload=(settings.environment == "development"),
+    )
