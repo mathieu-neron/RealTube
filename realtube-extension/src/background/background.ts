@@ -232,6 +232,18 @@ chrome.runtime.onMessage.addListener(
       return false;
     }
 
+    // Restrict user ID exposure to extension pages only (popup, options).
+    // Content scripts run in web page tabs (sender.tab is set) and should not
+    // receive the raw user ID — they use CHECK_VIDEOS/SUBMIT_VOTE instead,
+    // which handle the user ID internally.
+    if (
+      (message.type === "GET_USER_ID" || message.type === "GET_USER_INFO") &&
+      sender.tab
+    ) {
+      sendResponse({ success: false, error: "Not available from content scripts" });
+      return false;
+    }
+
     handleMessage(message)
       .then(sendResponse)
       .catch((err) => {

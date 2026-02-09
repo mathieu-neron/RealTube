@@ -37,13 +37,13 @@ Last updated: 2026-02-09
 | S19 | Container Security Constraints | done | 2026-02-09 | Added no-new-privileges + cap_drop ALL to go-backend, python-backend, db-exporter |
 | S20 | Extension — Remove Excessive Host Permission | done | 2026-02-09 | Removed *://youtube.com/* from host_permissions; only www and m subdomains remain |
 | S21 | Extension — Update React to Patched Version | done | 2026-02-09 | Updated to ^19.0.1; resolved to 19.2.4; npm audit: 0 vulnerabilities |
-| S22 | Extension — Restrict User ID Exposure | pending | | |
+| S22 | Extension — Restrict User ID Exposure | done | 2026-02-09 | GET_USER_ID/GET_USER_INFO blocked from content scripts (sender.tab check); only popup/options pages can access user ID |
 | S23 | Database Connection Encryption | pending | | |
 
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 21
+- **Completed:** 22
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 2
+- **Pending:** 1
