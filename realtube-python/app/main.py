@@ -1,4 +1,5 @@
 import asyncio
+import re
 from contextlib import asynccontextmanager
 
 import structlog
@@ -53,10 +54,24 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 
 # Middleware stack (order matters — last added is outermost)
-cors_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+# Parse CORS origins: exact origins go to allow_origins, wildcard patterns
+# (e.g. "chrome-extension://*", "http://localhost:*") become a regex.
+_cors_exact: list[str] = []
+_cors_patterns: list[str] = []
+for _o in settings.cors_origins.split(","):
+    _o = _o.strip()
+    if not _o:
+        continue
+    if _o.endswith("*"):
+        _cors_patterns.append(re.escape(_o.removesuffix("*")) + ".*")
+    else:
+        _cors_exact.append(_o)
+
+_cors_regex = "|".join(_cors_patterns) if _cors_patterns else None
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=_cors_exact if _cors_exact else (["*"] if settings.cors_origins == "*" else []),
+    allow_origin_regex=_cors_regex,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Origin", "Content-Type", "Accept", "X-User-ID"],
     expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
@@ -65,6 +80,10 @@ app.add_middleware(
 app.add_middleware(RateLimitMiddleware, limiters=configure_rate_limiters())
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(metrics.PrometheusMiddleware)
+
+# Warn if wildcard CORS is used in production
+if settings.environment == "production" and settings.cors_origins == "*":
+    logger.warning("CORS_ORIGINS is set to '*' in production — this allows any website to make API requests")
 
 app.include_router(health.router)
 app.include_router(videos.router)

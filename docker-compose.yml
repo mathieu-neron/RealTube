@@ -79,7 +79,7 @@ services:
       - PORT=8080
       - LOG_LEVEL=info
       - ENVIRONMENT=development
-      - CORS_ORIGINS=*
+      - CORS_ORIGINS=chrome-extension://*,moz-extension://*,https://localhost,http://localhost:*
       - EXPORT_DIR=/exports
     secrets:
       - postgres_password
@@ -114,7 +114,7 @@ services:
       - PORT=8081
       - LOG_LEVEL=info
       - ENVIRONMENT=development
-      - CORS_ORIGINS=*
+      - CORS_ORIGINS=chrome-extension://*,moz-extension://*,https://localhost,http://localhost:*
       - EXPORT_DIR=/exports
     secrets:
       - postgres_password

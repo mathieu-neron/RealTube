@@ -80,6 +80,11 @@ func main() {
 
 	router.Setup(app, handlers, cfg.CORSOrigins)
 
+	// Warn if wildcard CORS is used in production
+	if cfg.Environment == "production" && cfg.CORSOrigins == "*" {
+		log.Warn().Msg("CORS_ORIGINS is set to '*' in production — this allows any website to make API requests")
+	}
+
 	// Graceful shutdown: listen for SIGTERM/SIGINT
 	shutdownCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
