@@ -1,6 +1,6 @@
 # RealTube Security Implementation Status
 
-Last updated: 2026-02-07
+Last updated: 2026-02-09
 
 ## Phase 1: Critical (Must Fix Before Any Deployment)
 
@@ -22,7 +22,7 @@ Last updated: 2026-02-07
 | S9 | Add LIMIT Clauses to Unbounded Queries | done | 2026-02-09 | Hash prefix: 1000, delta sync: 10000, full sync: 50000. Applied to both Go and Python. |
 | S10 | Request Body Size Limit + Timeouts (Go) | done | 2026-02-09 | BodyLimit 1MB, ReadTimeout 10s, WriteTimeout 30s. 2MB payload returns 413. |
 | S11 | Path Traversal Protection in Export Handlers | done | 2026-02-09 | Regex filename validation + symlink-resolving path containment check in both Go and Python |
-| S12 | Remove DB/Redis Port Exposure | pending | | |
+| S12 | Remove DB/Redis Port Exposure | done | 2026-02-09 | Removed ports: sections from postgres and redis services; accessible only via Docker internal network |
 | S13 | NGINX — TLS/HTTPS + Security Headers | pending | | |
 | S14 | Restrict CORS Origins in Docker Compose | pending | | |
 | S15 | Extension — Replace innerHTML with Safe DOM APIs | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 11
+- **Completed:** 12
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 12
+- **Pending:** 11

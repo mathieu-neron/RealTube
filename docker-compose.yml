@@ -31,14 +31,13 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    # No ports exposed to host — accessible only via Docker internal network
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-realtube}
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: ${POSTGRES_DB:-realtube}
     secrets:
       - postgres_password
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
@@ -51,6 +50,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    # No ports exposed to host — accessible only via Docker internal network
     command: >
       sh -c 'redis-server
       --maxmemory 512mb
@@ -59,8 +59,6 @@ services:
       --requirepass "$$(cat /run/secrets/redis_password)"'
     secrets:
       - redis_password
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
