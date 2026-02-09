@@ -9,7 +9,7 @@ Last updated: 2026-02-07
 | S1 | Fiber Trusted Proxy Configuration | done | 2026-02-07 | Used X-Real-IP (not X-Forwarded-For) as ProxyHeader since NGINX sets it from $remote_addr which can't be spoofed |
 | S2 | Replace Hardcoded Credentials with Env Vars | done | 2026-02-09 | Used ${VAR:?} for required vars, ${VAR:-default} for optional. .env.example template created. |
 | S3 | Redis Authentication | done | 2026-02-09 | requirepass via Docker secret file; both backends build Redis URL from /run/secrets/redis_password |
-| S4 | NGINX PII Fix — Disable IP Logging | pending | | |
+| S4 | NGINX PII Fix — Disable IP Logging | done | 2026-02-09 | access_log off; removed log_format with $remote_addr |
 | S5 | Extension — Message Origin Validation | pending | | |
 | S6 | Extension — HTTPS Default + Read Server URL | pending | | |
 | S7 | Extension — Content Security Policy | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 3
+- **Completed:** 4
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 20
+- **Pending:** 19
