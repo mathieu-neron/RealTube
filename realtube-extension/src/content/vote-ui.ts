@@ -4,8 +4,13 @@
 
 import "./vote-ui.css";
 
-// ── SVG icon ──
-const ICON_EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><polygon points="12,8 16,12 12,16 8,12" fill="currentColor" stroke="none"/></svg>`;
+// ── SVG icon (parsed once via DOMParser to avoid innerHTML) ──
+const ICON_SVG_MARKUP = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><polygon points="12,8 16,12 12,16 8,12" fill="currentColor" stroke="none"/></svg>`;
+
+function createIconElement(): SVGElement {
+  const doc = new DOMParser().parseFromString(ICON_SVG_MARKUP, "image/svg+xml");
+  return doc.documentElement as unknown as SVGElement;
+}
 
 // ── State ──
 let buttonEl: HTMLButtonElement | null = null;
@@ -70,11 +75,18 @@ export function injectVoteButton(): void {
 
   if (shorts) {
     buttonEl.className = "realtube-vote-btn-shorts";
-    buttonEl.innerHTML = `${ICON_EYE}<span class="realtube-vote-btn-shorts-label">Flag AI</span>`;
+    buttonEl.appendChild(document.adoptNode(createIconElement()));
+    const label = document.createElement("span");
+    label.className = "realtube-vote-btn-shorts-label";
+    label.textContent = "Flag AI";
+    buttonEl.appendChild(label);
     actionBar.prepend(buttonEl);
   } else {
     buttonEl.className = "realtube-vote-btn";
-    buttonEl.innerHTML = `${ICON_EYE}<span>Flag AI</span>`;
+    buttonEl.appendChild(document.adoptNode(createIconElement()));
+    const label = document.createElement("span");
+    label.textContent = "Flag AI";
+    buttonEl.appendChild(label);
     actionBar.appendChild(buttonEl);
   }
 }
