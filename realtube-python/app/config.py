@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     postgres_host: str = "localhost"
     postgres_port: int = 5432
     postgres_db: str = "realtube"
+    postgres_sslmode: str = "prefer"
 
     model_config = {"env_file": ".env"}
 
@@ -35,6 +36,7 @@ class Settings(BaseSettings):
             self.database_url = (
                 f"postgres://{self.postgres_user}:{password}"
                 f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+                f"?sslmode={self.postgres_sslmode}"
             )
 
         if not self.redis_url:

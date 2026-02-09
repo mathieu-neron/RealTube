@@ -38,12 +38,12 @@ Last updated: 2026-02-09
 | S20 | Extension — Remove Excessive Host Permission | done | 2026-02-09 | Removed *://youtube.com/* from host_permissions; only www and m subdomains remain |
 | S21 | Extension — Update React to Patched Version | done | 2026-02-09 | Updated to ^19.0.1; resolved to 19.2.4; npm audit: 0 vulnerabilities |
 | S22 | Extension — Restrict User ID Exposure | done | 2026-02-09 | GET_USER_ID/GET_USER_INFO blocked from content scripts (sender.tab check); only popup/options pages can access user ID |
-| S23 | Database Connection Encryption | pending | | |
+| S23 | Database Connection Encryption | done | 2026-02-09 | sslmode=prefer appended to constructed DB URLs in both backends; configurable via POSTGRES_SSLMODE env var; production should use 'require' or 'verify-full' |
 
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 22
+- **Completed:** 23
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 1
+- **Pending:** 0

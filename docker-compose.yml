@@ -78,6 +78,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
+      - POSTGRES_SSLMODE=${POSTGRES_SSLMODE:-prefer}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - PORT=8080
@@ -117,6 +118,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
+      - POSTGRES_SSLMODE=${POSTGRES_SSLMODE:-prefer}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - PORT=8081

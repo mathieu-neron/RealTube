@@ -75,5 +75,6 @@ func buildDatabaseURL() string {
 	port := getEnv("POSTGRES_PORT", "5432")
 	db := getEnv("POSTGRES_DB", "realtube")
 
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, db)
+	sslmode := getEnv("POSTGRES_SSLMODE", "prefer")
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", user, password, host, port, db, sslmode)
 }
