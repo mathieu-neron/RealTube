@@ -9,6 +9,10 @@
 #   db-exporter     - Daily pg_dump to ./exports/
 #   nginx           - NGINX reverse proxy (port 80)
 
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
+
 services:
   nginx:
     image: nginx:alpine
@@ -26,9 +30,11 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: realtube
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: realtube
+      POSTGRES_USER: ${POSTGRES_USER:-realtube}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-realtube}
+    secrets:
+      - postgres_password
     ports:
       - "5432:5432"
     volumes:
@@ -59,13 +65,18 @@ services:
       context: ./realtube-go
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgres://realtube:password@postgres:5432/realtube
+      - POSTGRES_USER=${POSTGRES_USER:-realtube}
+      - POSTGRES_DB=${POSTGRES_DB:-realtube}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - REDIS_URL=redis://redis:6379
       - PORT=8080
       - LOG_LEVEL=info
       - ENVIRONMENT=development
       - CORS_ORIGINS=*
       - EXPORT_DIR=/exports
+    secrets:
+      - postgres_password
     ports:
       - "8080:8080"
     volumes:
@@ -87,13 +98,18 @@ services:
       context: ./realtube-python
       dockerfile: Dockerfile
     environment:
-      - DATABASE_URL=postgres://realtube:password@postgres:5432/realtube
+      - POSTGRES_USER=${POSTGRES_USER:-realtube}
+      - POSTGRES_DB=${POSTGRES_DB:-realtube}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
       - REDIS_URL=redis://redis:6379
       - PORT=8081
       - LOG_LEVEL=info
       - ENVIRONMENT=development
       - CORS_ORIGINS=*
       - EXPORT_DIR=/exports
+    secrets:
+      - postgres_password
     ports:
       - "8081:8081"
     volumes:
@@ -114,17 +130,15 @@ services:
     image: postgres:16-alpine
     environment:
       PGHOST: postgres
-      PGUSER: realtube
-      PGPASSWORD: password
-      PGDATABASE: realtube
+      PGUSER: ${POSTGRES_USER:-realtube}
+      PGDATABASE: ${POSTGRES_DB:-realtube}
+    secrets:
+      - postgres_password
     volumes:
       - ./exports:/exports
       - ./scripts/db-export.sh:/db-export.sh:ro
-    entrypoint: >
-      sh -c "while true; do
-        sh /db-export.sh /exports;
-        sleep 86400;
-      done"
+      - ./scripts/db-exporter-entrypoint.sh:/db-exporter-entrypoint.sh:ro
+    entrypoint: ["sh", "/db-exporter-entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy

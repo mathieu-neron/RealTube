@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"strings"
+)
 
 type Config struct {
 	Port        string
@@ -15,7 +19,7 @@ type Config struct {
 func Load() *Config {
 	return &Config{
 		Port:        getEnv("PORT", "8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://realtube:password@localhost:5432/realtube"),
+		DatabaseURL: buildDatabaseURL(),
 		RedisURL:    getEnv("REDIS_URL", "redis://localhost:6379"),
 		LogLevel:    getEnv("LOG_LEVEL", "info"),
 		Environment: getEnv("ENVIRONMENT", "development"),
@@ -29,4 +33,30 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+// readSecret reads a Docker secret from /run/secrets/<name>.
+// Falls back to the given env var, then to the fallback value.
+func readSecret(secretName, envVar, fallback string) string {
+	data, err := os.ReadFile("/run/secrets/" + secretName)
+	if err == nil {
+		return strings.TrimSpace(string(data))
+	}
+	return getEnv(envVar, fallback)
+}
+
+// buildDatabaseURL constructs the database connection string.
+// Priority: DATABASE_URL env var > constructed from components + secret file.
+func buildDatabaseURL() string {
+	if url := os.Getenv("DATABASE_URL"); url != "" {
+		return url
+	}
+
+	user := getEnv("POSTGRES_USER", "realtube")
+	password := readSecret("postgres_password", "POSTGRES_PASSWORD", "password")
+	host := getEnv("POSTGRES_HOST", "localhost")
+	port := getEnv("POSTGRES_PORT", "5432")
+	db := getEnv("POSTGRES_DB", "realtube")
+
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, db)
 }

@@ -44,6 +44,7 @@ exports/*.sql.gz
 *.log
 
 # Secrets / certs
+secrets/
 nginx/certs/
 
 # Claude Code

@@ -7,7 +7,7 @@ Last updated: 2026-02-07
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
 | S1 | Fiber Trusted Proxy Configuration | done | 2026-02-07 | Used X-Real-IP (not X-Forwarded-For) as ProxyHeader since NGINX sets it from $remote_addr which can't be spoofed |
-| S2 | Replace Hardcoded Credentials with Env Vars | pending | | |
+| S2 | Replace Hardcoded Credentials with Env Vars | done | 2026-02-09 | Used ${VAR:?} for required vars, ${VAR:-default} for optional. .env.example template created. |
 | S3 | Redis Authentication | pending | | |
 | S4 | NGINX PII Fix — Disable IP Logging | pending | | |
 | S5 | Extension — Message Origin Validation | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 1
+- **Completed:** 2
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 22
+- **Pending:** 21
