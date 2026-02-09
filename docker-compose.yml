@@ -12,6 +12,8 @@
 secrets:
   postgres_password:
     file: ./secrets/postgres_password
+  redis_password:
+    file: ./secrets/redis_password
 
 services:
   nginx:
@@ -50,10 +52,13 @@ services:
   redis:
     image: redis:7-alpine
     command: >
-      redis-server
+      sh -c 'redis-server
       --maxmemory 512mb
       --maxmemory-policy allkeys-lru
       --appendonly no
+      --requirepass "$$(cat /run/secrets/redis_password)"'
+    secrets:
+      - redis_password
     ports:
       - "6379:6379"
     volumes:
@@ -69,7 +74,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - PORT=8080
       - LOG_LEVEL=info
       - ENVIRONMENT=development
@@ -77,6 +83,7 @@ services:
       - EXPORT_DIR=/exports
     secrets:
       - postgres_password
+      - redis_password
     ports:
       - "8080:8080"
     volumes:
@@ -102,7 +109,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-realtube}
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
-      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - PORT=8081
       - LOG_LEVEL=info
       - ENVIRONMENT=development
@@ -110,6 +118,7 @@ services:
       - EXPORT_DIR=/exports
     secrets:
       - postgres_password
+      - redis_password
     ports:
       - "8081:8081"
     volumes:

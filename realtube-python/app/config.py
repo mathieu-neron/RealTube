@@ -6,7 +6,10 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     port: int = 8081
     database_url: str = ""
-    redis_url: str = "redis://localhost:6379"
+    redis_url: str = ""
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = ""
     log_level: str = "info"
     environment: str = "development"
     cors_origins: str = "*"
@@ -33,6 +36,13 @@ class Settings(BaseSettings):
                 f"postgres://{self.postgres_user}:{password}"
                 f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
             )
+
+        if not self.redis_url:
+            redis_pw = self._read_secret("redis_password", self.redis_password)
+            if redis_pw:
+                self.redis_url = f"redis://:{redis_pw}@{self.redis_host}:{self.redis_port}"
+            else:
+                self.redis_url = f"redis://{self.redis_host}:{self.redis_port}"
 
 
 settings = Settings()

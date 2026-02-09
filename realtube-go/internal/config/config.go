@@ -20,7 +20,7 @@ func Load() *Config {
 	return &Config{
 		Port:        getEnv("PORT", "8080"),
 		DatabaseURL: buildDatabaseURL(),
-		RedisURL:    getEnv("REDIS_URL", "redis://localhost:6379"),
+		RedisURL:    buildRedisURL(),
 		LogLevel:    getEnv("LOG_LEVEL", "info"),
 		Environment: getEnv("ENVIRONMENT", "development"),
 		CORSOrigins: getEnv("CORS_ORIGINS", "*"),
@@ -43,6 +43,23 @@ func readSecret(secretName, envVar, fallback string) string {
 		return strings.TrimSpace(string(data))
 	}
 	return getEnv(envVar, fallback)
+}
+
+// buildRedisURL constructs the Redis connection string.
+// Priority: REDIS_URL env var > constructed from REDIS_HOST/REDIS_PORT + secret file.
+func buildRedisURL() string {
+	if url := os.Getenv("REDIS_URL"); url != "" {
+		return url
+	}
+
+	host := getEnv("REDIS_HOST", "localhost")
+	port := getEnv("REDIS_PORT", "6379")
+	password := readSecret("redis_password", "REDIS_PASSWORD", "")
+
+	if password != "" {
+		return fmt.Sprintf("redis://:%s@%s:%s", password, host, port)
+	}
+	return fmt.Sprintf("redis://%s:%s", host, port)
 }
 
 // buildDatabaseURL constructs the database connection string.
