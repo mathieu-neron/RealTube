@@ -10,7 +10,7 @@ Last updated: 2026-02-07
 | S2 | Replace Hardcoded Credentials with Env Vars | done | 2026-02-09 | Used ${VAR:?} for required vars, ${VAR:-default} for optional. .env.example template created. |
 | S3 | Redis Authentication | done | 2026-02-09 | requirepass via Docker secret file; both backends build Redis URL from /run/secrets/redis_password |
 | S4 | NGINX PII Fix — Disable IP Logging | done | 2026-02-09 | access_log off; removed log_format with $remote_addr |
-| S5 | Extension — Message Origin Validation | pending | | |
+| S5 | Extension — Message Origin Validation | done | 2026-02-09 | Validates sender.id === chrome.runtime.id; rejects external messages |
 | S6 | Extension — HTTPS Default + Read Server URL | pending | | |
 | S7 | Extension — Content Security Policy | pending | | |
 | S8 | Python Backend — Add CORS Middleware | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 4
+- **Completed:** 5
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 19
+- **Pending:** 18

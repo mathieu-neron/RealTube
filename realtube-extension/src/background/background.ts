@@ -223,9 +223,15 @@ async function handleMessage(
 chrome.runtime.onMessage.addListener(
   (
     message: Message,
-    _sender: chrome.runtime.MessageSender,
+    sender: chrome.runtime.MessageSender,
     sendResponse: (response: MessageResponse) => void
   ) => {
+    // Reject messages from external sources (other extensions, web pages)
+    if (sender.id !== chrome.runtime.id) {
+      sendResponse({ success: false, error: "Unauthorized sender" });
+      return false;
+    }
+
     handleMessage(message)
       .then(sendResponse)
       .catch((err) => {
