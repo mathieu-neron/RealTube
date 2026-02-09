@@ -1,6 +1,6 @@
 // API client with retry/exponential backoff for communicating with RealTube server
 
-const DEFAULT_BASE_URL = "https://localhost";
+const DEFAULT_BASE_URL = "http://localhost:8080";
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 

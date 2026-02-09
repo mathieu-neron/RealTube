@@ -195,7 +195,9 @@ async function handleMessage(
     }
 
     case "OPEN_POPUP": {
-      await chrome.action.openPopup();
+      // Deprecated: voting now uses inline dropdown in content script.
+      // Kept for backward compatibility with older content script versions.
+      console.warn("RealTube: OPEN_POPUP is deprecated — voting is now inline via the content script dropdown.");
       return { success: true };
     }
 
