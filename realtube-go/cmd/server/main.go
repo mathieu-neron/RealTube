@@ -66,6 +66,9 @@ func main() {
 	app := fiber.New(fiber.Config{
 		AppName:      "RealTube API",
 		ServerHeader: "RealTube",
+		BodyLimit:    1 * 1024 * 1024, // 1 MB max request body
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
 		// Trusted proxy: NGINX sits in front, forwarding client IP via X-Forwarded-For.
 		// Without this, attackers can spoof IPs to bypass rate limiting.
 		TrustProxy:   true,

@@ -20,7 +20,7 @@ Last updated: 2026-02-07
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
 | S9 | Add LIMIT Clauses to Unbounded Queries | done | 2026-02-09 | Hash prefix: 1000, delta sync: 10000, full sync: 50000. Applied to both Go and Python. |
-| S10 | Request Body Size Limit + Timeouts (Go) | pending | | |
+| S10 | Request Body Size Limit + Timeouts (Go) | done | 2026-02-09 | BodyLimit 1MB, ReadTimeout 10s, WriteTimeout 30s. 2MB payload returns 413. |
 | S11 | Path Traversal Protection in Export Handlers | pending | | |
 | S12 | Remove DB/Redis Port Exposure | pending | | |
 | S13 | NGINX — TLS/HTTPS + Security Headers | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 9
+- **Completed:** 10
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 14
+- **Pending:** 13
