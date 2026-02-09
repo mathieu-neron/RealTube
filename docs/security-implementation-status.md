@@ -12,7 +12,7 @@ Last updated: 2026-02-07
 | S4 | NGINX PII Fix — Disable IP Logging | done | 2026-02-09 | access_log off; removed log_format with $remote_addr |
 | S5 | Extension — Message Origin Validation | done | 2026-02-09 | Validates sender.id === chrome.runtime.id; rejects external messages |
 | S6 | Extension — HTTPS Default + Read Server URL | done | 2026-02-09 | Default https://localhost; reads serverUrl from storage; rejects non-https except localhost |
-| S7 | Extension — Content Security Policy | pending | | |
+| S7 | Extension — Content Security Policy | done | 2026-02-09 | script-src 'self'; object-src 'none'; connect-src https: http://localhost:* |
 | S8 | Python Backend — Add CORS Middleware | pending | | |
 
 ## Phase 2: High (Fix Before Public Launch)
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 6
+- **Completed:** 7
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 17
+- **Pending:** 16

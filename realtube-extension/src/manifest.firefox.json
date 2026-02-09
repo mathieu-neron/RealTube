@@ -28,6 +28,7 @@
       "128": "icons/icon128.png"
     }
   },
+  "content_security_policy": "script-src 'self'; object-src 'none'; connect-src https: http://localhost:*;",
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
