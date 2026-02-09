@@ -13,7 +13,7 @@ Last updated: 2026-02-07
 | S5 | Extension — Message Origin Validation | done | 2026-02-09 | Validates sender.id === chrome.runtime.id; rejects external messages |
 | S6 | Extension — HTTPS Default + Read Server URL | done | 2026-02-09 | Default https://localhost; reads serverUrl from storage; rejects non-https except localhost |
 | S7 | Extension — Content Security Policy | done | 2026-02-09 | script-src 'self'; object-src 'none'; connect-src https: http://localhost:* |
-| S8 | Python Backend — Add CORS Middleware | pending | | |
+| S8 | Python Backend — Add CORS Middleware | done | 2026-02-09 | CORSMiddleware added; methods restricted to GET/POST/DELETE/OPTIONS; headers match Go backend |
 
 ## Phase 2: High (Fix Before Public Launch)
 
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 7
+- **Completed:** 8
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 16
+- **Pending:** 15

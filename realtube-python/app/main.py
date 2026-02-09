@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db.database import create_pool
@@ -52,6 +53,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="RealTube API", version="0.1.0", lifespan=lifespan)
 
 # Middleware stack (order matters — last added is outermost)
+cors_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Origin", "Content-Type", "Accept", "X-User-ID"],
+    expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
+    max_age=86400,
+)
 app.add_middleware(RateLimitMiddleware, limiters=configure_rate_limiters())
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(metrics.PrometheusMiddleware)
