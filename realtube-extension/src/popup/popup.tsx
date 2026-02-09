@@ -127,7 +127,7 @@ const CATEGORIES = [
   { id: "fully_ai", label: "Fully AI", icon: "\u2b22" },
   { id: "ai_voiceover", label: "AI Voice", icon: "\u266a" },
   { id: "ai_visuals", label: "AI Visuals", icon: "\u25c6" },
-  { id: "ai_thumbnails", label: "AI Thumb", icon: "\u25a3" },
+  { id: "ai_thumbnails", label: "AI Thumbnail", icon: "\u25a3" },
   { id: "ai_assisted", label: "AI Assist", icon: "\u2726" },
 ] as const;
 
@@ -135,7 +135,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   fully_ai: "Fully AI",
   ai_voiceover: "AI Voice",
   ai_visuals: "AI Visuals",
-  ai_thumbnails: "AI Thumb",
+  ai_thumbnails: "AI Thumbnail",
   ai_assisted: "AI Assist",
 };
 
@@ -271,6 +271,8 @@ function QuickVote({
   feedback: VoteFeedback | null;
   submitting: string | null;
 }) {
+  const [selected, setSelected] = useState<string | null>(null);
+
   if (feedback) {
     return (
       <div className="rt-section">
@@ -290,19 +292,22 @@ function QuickVote({
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
-            className={`rt-qv-btn${submitting === cat.id ? " voted" : ""}`}
+            className={`rt-qv-btn${selected === cat.id ? " selected" : ""}`}
             disabled={submitting !== null}
-            onClick={() => onVote(cat.id)}
+            onClick={() => setSelected(selected === cat.id ? null : cat.id)}
           >
-            {submitting === cat.id ? (
-              <span className="rt-spinner" />
-            ) : (
-              <span>{cat.icon}</span>
-            )}
+            <span>{cat.icon}</span>
             <span>{cat.label}</span>
           </button>
         ))}
       </div>
+      <button
+        className="rt-qv-submit"
+        disabled={!selected || submitting !== null}
+        onClick={() => { if (selected) onVote(selected); }}
+      >
+        {submitting ? <span className="rt-spinner" /> : "Vote"}
+      </button>
     </div>
   );
 }

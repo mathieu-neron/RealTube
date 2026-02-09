@@ -17,7 +17,7 @@ const CATEGORIES = [
   { id: "fully_ai", label: "Fully AI", icon: "\u2B22" },
   { id: "ai_voiceover", label: "AI Voice", icon: "\u266A" },
   { id: "ai_visuals", label: "AI Visuals", icon: "\u25C6" },
-  { id: "ai_thumbnails", label: "AI Thumb", icon: "\u25A3" },
+  { id: "ai_thumbnails", label: "AI Thumbnail", icon: "\u25A3" },
   { id: "ai_assisted", label: "AI Assist", icon: "\u2726" },
 ];
 

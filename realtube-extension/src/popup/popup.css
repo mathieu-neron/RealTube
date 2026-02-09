@@ -426,7 +426,7 @@ html, body {
   transform: scale(0.97);
 }
 
-.rt-qv-btn.voted {
+.rt-qv-btn.selected {
   background: var(--rt-accent-dim);
   border-color: var(--rt-accent);
   color: var(--rt-accent);
@@ -438,10 +438,51 @@ html, body {
   transform: none;
 }
 
+.rt-qv-btn.selected:disabled {
+  opacity: 1;
+}
+
 .rt-qv-btn svg {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+/* Vote submit button */
+.rt-qv-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 34px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 8px;
+  background: var(--rt-accent);
+  color: var(--rt-bg);
+  font-family: var(--rt-font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.rt-qv-submit:hover {
+  opacity: 0.9;
+}
+
+.rt-qv-submit:active {
+  transform: scale(0.97);
+}
+
+.rt-qv-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rt-qv-submit:disabled:hover {
+  opacity: 0.35;
 }
 
 /* Vote feedback */
