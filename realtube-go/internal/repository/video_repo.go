@@ -23,7 +23,8 @@ func (r *VideoRepo) FindByHashPrefix(ctx context.Context, prefix string) ([]mode
 		       video_duration, is_short, first_reported, last_updated, service
 		FROM videos
 		WHERE encode(sha256(video_id::bytea), 'hex') LIKE $1 || '%'
-		  AND hidden = false AND shadow_hidden = false`
+		  AND hidden = false AND shadow_hidden = false
+		LIMIT 1000`
 
 	rows, err := r.pool.Query(ctx, query, prefix)
 	if err != nil {

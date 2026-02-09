@@ -19,7 +19,7 @@ Last updated: 2026-02-07
 
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
-| S9 | Add LIMIT Clauses to Unbounded Queries | pending | | |
+| S9 | Add LIMIT Clauses to Unbounded Queries | done | 2026-02-09 | Hash prefix: 1000, delta sync: 10000, full sync: 50000. Applied to both Go and Python. |
 | S10 | Request Body Size Limit + Timeouts (Go) | pending | | |
 | S11 | Path Traversal Protection in Export Handlers | pending | | |
 | S12 | Remove DB/Redis Port Exposure | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-07
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 8
+- **Completed:** 9
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 15
+- **Pending:** 14

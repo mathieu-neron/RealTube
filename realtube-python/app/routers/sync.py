@@ -48,7 +48,8 @@ async def delta_sync(
             """SELECT video_id, score, categories, channel_id, action
                FROM sync_cache
                WHERE changed_at > $1
-               ORDER BY changed_at ASC""",
+               ORDER BY changed_at ASC
+               LIMIT 10000""",
             since_dt,
         )
 
@@ -75,7 +76,8 @@ async def delta_sync(
             """SELECT channel_id, score
                FROM channels
                WHERE last_updated > $1
-               ORDER BY last_updated ASC""",
+               ORDER BY last_updated ASC
+               LIMIT 10000""",
             since_dt,
         )
 
@@ -111,7 +113,8 @@ async def full_sync(
                       video_duration, is_short, first_reported, last_updated, service
                FROM videos
                WHERE hidden = false AND shadow_hidden = false AND score > 0
-               ORDER BY last_updated DESC"""
+               ORDER BY last_updated DESC
+               LIMIT 50000"""
         )
 
         video_responses: list[VideoResponse] = []
@@ -133,7 +136,8 @@ async def full_sync(
             """SELECT channel_id, score, total_videos, flagged_videos, top_category, locked, last_updated
                FROM channels
                WHERE score > 0
-               ORDER BY last_updated DESC"""
+               ORDER BY last_updated DESC
+               LIMIT 50000"""
         )
 
         channel_responses: list[ChannelResponse] = []

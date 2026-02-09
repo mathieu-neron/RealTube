@@ -28,7 +28,8 @@ func (s *SyncService) DeltaSync(ctx context.Context, since time.Time) (*model.Sy
 		SELECT video_id, score, categories, channel_id, action
 		FROM sync_cache
 		WHERE changed_at > $1
-		ORDER BY changed_at ASC`
+		ORDER BY changed_at ASC
+		LIMIT 10000`
 
 	rows, err := s.pool.Query(ctx, videoQuery, since)
 	if err != nil {
@@ -64,7 +65,8 @@ func (s *SyncService) DeltaSync(ctx context.Context, since time.Time) (*model.Sy
 		SELECT channel_id, score
 		FROM channels
 		WHERE last_updated > $1
-		ORDER BY last_updated ASC`
+		ORDER BY last_updated ASC
+		LIMIT 10000`
 
 	channelRows, err := s.pool.Query(ctx, channelQuery, since)
 	if err != nil {
@@ -108,7 +110,8 @@ func (s *SyncService) FullSync(ctx context.Context) (*model.SyncFullResponse, er
 		       video_duration, is_short, first_reported, last_updated, service
 		FROM videos
 		WHERE hidden = false AND shadow_hidden = false AND score > 0
-		ORDER BY last_updated DESC`
+		ORDER BY last_updated DESC
+		LIMIT 50000`
 
 	rows, err := s.pool.Query(ctx, videoQuery)
 	if err != nil {
@@ -147,7 +150,8 @@ func (s *SyncService) FullSync(ctx context.Context) (*model.SyncFullResponse, er
 		SELECT channel_id, score, total_videos, flagged_videos, top_category, locked, last_updated
 		FROM channels
 		WHERE score > 0
-		ORDER BY last_updated DESC`
+		ORDER BY last_updated DESC
+		LIMIT 50000`
 
 	channelRows, err := s.pool.Query(ctx, channelQuery)
 	if err != nil {

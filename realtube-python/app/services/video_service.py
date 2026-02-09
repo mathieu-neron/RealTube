@@ -12,6 +12,7 @@ FIND_BY_HASH_PREFIX = """
     FROM videos
     WHERE encode(sha256(video_id::bytea), 'hex') LIKE $1 || '%'
       AND hidden = false AND shadow_hidden = false
+    LIMIT 1000
 """
 
 FIND_BY_VIDEO_ID = """
