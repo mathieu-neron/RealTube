@@ -32,7 +32,7 @@ Last updated: 2026-02-09
 
 | Step | Description | Status | Date | Notes |
 |------|------------|--------|------|-------|
-| S17 | Health Endpoint — Sanitize Error Messages | pending | | |
+| S17 | Health Endpoint — Sanitize Error Messages | done | 2026-02-09 | Replaced err.Error()/str(e) with generic "connection failed" in both Go and Python health checks |
 | S18 | Rate Limiter Memory Cleanup | pending | | |
 | S19 | Container Security Constraints | pending | | |
 | S20 | Extension — Remove Excessive Host Permission | pending | | |
@@ -43,7 +43,7 @@ Last updated: 2026-02-09
 ## Summary
 
 - **Total steps:** 23
-- **Completed:** 16
+- **Completed:** 17
 - **In progress:** 0
 - **Blocked:** 0
-- **Pending:** 7
+- **Pending:** 6

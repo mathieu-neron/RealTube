@@ -26,7 +26,7 @@ async def ready(request: Request):
     if pool is not None:
         checks["database"] = await _check_db(pool)
     else:
-        checks["database"] = {"status": "down", "error": "no pool"}
+        checks["database"] = {"status": "down", "error": "connection failed"}
 
     if checks["database"]["status"] != "up":
         overall_status = "degraded"
@@ -62,9 +62,9 @@ async def _check_db(pool: asyncpg.Pool) -> dict:
             await conn.fetchval("SELECT 1")
         latency_ms = int((time.time() - start) * 1000)
         return {"status": "up", "latency_ms": latency_ms}
-    except Exception as e:
+    except Exception:
         latency_ms = int((time.time() - start) * 1000)
-        return {"status": "down", "latency_ms": latency_ms, "error": str(e)}
+        return {"status": "down", "latency_ms": latency_ms, "error": "connection failed"}
 
 
 async def _check_redis(rdb) -> dict:
@@ -73,6 +73,6 @@ async def _check_redis(rdb) -> dict:
         await rdb.ping()
         latency_ms = int((time.time() - start) * 1000)
         return {"status": "up", "latency_ms": latency_ms}
-    except Exception as e:
+    except Exception:
         latency_ms = int((time.time() - start) * 1000)
-        return {"status": "down", "latency_ms": latency_ms, "error": str(e)}
+        return {"status": "down", "latency_ms": latency_ms, "error": "connection failed"}

@@ -78,7 +78,7 @@ func checkDB(ctx context.Context, pool *pgxpool.Pool) fiber.Map {
 		return fiber.Map{
 			"status":     "down",
 			"latency_ms": latency,
-			"error":      err.Error(),
+			"error":      "connection failed",
 		}
 	}
 	return fiber.Map{
@@ -102,7 +102,7 @@ func checkRedis(ctx context.Context, rdb *redis.Client) fiber.Map {
 		return fiber.Map{
 			"status":     "down",
 			"latency_ms": latency,
-			"error":      err.Error(),
+			"error":      "connection failed",
 		}
 	}
 	return fiber.Map{
