@@ -260,7 +260,7 @@ function CurrentVideoInfo({ video }: { video: CachedVideo | null }) {
 
 // ── Quick Vote ──
 
-function QuickVote({
+export function QuickVote({
   videoId,
   onVote,
   feedback,
@@ -380,7 +380,7 @@ function CacheInfo({
 
 // ── Main Popup ──
 
-function Popup() {
+export function Popup() {
   const [loading, setLoading] = useState(true);
   const [enabled, setEnabled] = useState(true);
   const [connected, setConnected] = useState<"online" | "offline" | "unknown">("unknown");

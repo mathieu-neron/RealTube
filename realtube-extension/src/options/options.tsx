@@ -200,7 +200,7 @@ function Slider({
 
 // ── Main Options Page ──
 
-function Options() {
+export function Options() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [userId, setUserId] = useState<string | null>(null);
