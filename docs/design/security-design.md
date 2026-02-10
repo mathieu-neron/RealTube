@@ -25,6 +25,21 @@
 
 ## 19. Abuse & Gaming Vectors
 
+```mermaid
+flowchart TD
+    A["Abuse Vector"] --> B["Brigading<br/>(mass-flagging)"]
+    A --> C["Bot Farms<br/>(automated votes)"]
+    A --> D["Self-Clearing<br/>(by AI creators)"]
+    A --> E["Trust Farming<br/>(build then brigade)"]
+    A --> F["Privacy Exploitation<br/>(hash enumeration)"]
+
+    B --> B1["Low new-account trust weight<br/>Vote spike detection<br/>IP clustering cap<br/>VIP override + appeal"]
+    C --> C1["Rate limiting (10/min/IP)<br/>Extension origin validation<br/>CAPTCHA escalation<br/>IP-to-user ratio monitoring"]
+    D --> D1["No counter-votes exist<br/>VIP locks immutable<br/>Cannot suppress flags"]
+    E --> E1["Trust capped at 1.0<br/>30-day rolling accuracy<br/>Behavior change detection"]
+    F --> F1["k-anonymity (4-8 char prefix)<br/>Lookups not linked to users<br/>Batched to reduce fingerprinting"]
+```
+
 ### Attack 1: Brigading (coordinated mass-flagging of legitimate creators)
 
 A group targets a human creator's videos with false AI flags.

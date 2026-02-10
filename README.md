@@ -29,15 +29,15 @@ RealTube is a browser extension backed by a crowdsourced platform that lets the 
 
 ## Architecture
 
-```
-┌─────────────┐     ┌─────────┐     ┌──────────────┐     ┌────────────┐
-│  Extension   │────▶│  NGINX  │────▶│  Go Backend  │────▶│ PostgreSQL │
-│  (Chrome/FF) │     │  :80    │     │  :8080       │     │  :5432     │
-└─────────────┘     │         │     └──────────────┘     └────────────┘
-                    │         │     ┌──────────────┐     ┌────────────┐
-                    │         │────▶│ Python Back.  │     │   Redis    │
-                    │         │     │  :8081       │     │   :6379    │
-                    └─────────┘     └──────────────┘     └────────────┘
+```mermaid
+graph LR
+    Ext["Extension<br/>(Chrome/FF)"] --> NGINX[":80<br/>NGINX"]
+    NGINX --> Go[":8080<br/>Go Backend"]
+    NGINX --> Py[":8081<br/>Python Backend"]
+    Go --> PG[":5432<br/>PostgreSQL"]
+    Go --> Redis[":6379<br/>Redis"]
+    Py --> PG
+    Py --> Redis
 ```
 
 ### Monorepo Structure

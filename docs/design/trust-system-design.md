@@ -6,30 +6,37 @@
 
 Each user has a trust score from 0.0 to 1.0 that weights their votes:
 
-```
-trust_score = (age_factor * 0.30) + (accuracy_factor * 0.50) + (volume_factor * 0.20)
+```mermaid
+flowchart LR
+    subgraph Age["Age Factor (30%)"]
+        A1["age_days = days since first_seen"]
+        A2["age_factor = min(age_days / 60, 1.0)"]
+        A1 --> A2
+    end
+    subgraph Acc["Accuracy Factor (50%)"]
+        B1["accurate_votes / total_votes"]
+        B2["min 10 votes for stability<br/>default 0.5 if &lt;10"]
+        B1 --> B2
+    end
+    subgraph Vol["Volume Factor (20%)"]
+        C1["volume_factor = min(total_votes / 100, 1.0)"]
+    end
+
+    A2 -->|"× 0.30"| T["trust_score"]
+    B2 -->|"× 0.50"| T
+    C1 -->|"× 0.20"| T
 ```
 
 **Age Factor (30%):**
-```
-age_days = days since first_seen
-age_factor = min(age_days / 60, 1.0)
-```
 - New accounts start at 0.0, reach full weight after 60 days
 - Prevents new-account brigading
 
 **Accuracy Factor (50%):**
-```
-accuracy_factor = accurate_votes / total_votes (min 10 votes for stability)
-```
 - A vote is "accurate" if the video's final score aligns with the vote direction
 - Evaluated in 30-day rolling windows
 - Users below 10 votes get default 0.5 accuracy
 
 **Volume Factor (20%):**
-```
-volume_factor = min(total_votes / 100, 1.0)
-```
 - Rewards consistent contributors
 - Full weight at 100+ lifetime votes
 
@@ -37,22 +44,30 @@ volume_factor = min(total_votes / 100, 1.0)
 
 When a user votes, their trust score determines the vote's weight:
 
-```
-effective_weight = trust_score * base_weight
+```mermaid
+flowchart LR
+    TS["trust_score"] --> Mult["×"]
+    BW["base_weight"] --> Mult
+    Mult --> EW["effective_weight"]
 
-where base_weight:
-  - Regular user: 1.0
-  - VIP user: 3.0
-  - Shadowbanned user: 0.0 (vote recorded but not counted)
+    subgraph base_weight
+        R["Regular user: 1.0"]
+        V["VIP user: 3.0"]
+        S["Shadowbanned: 0.0<br/>(recorded but not counted)"]
+    end
 ```
 
 ### Video Score Calculation
 
-```
-For each category:
-  category_weighted_score = sum(vote.trust_weight for votes in category) / total_possible_weight * 100
-
-Overall video score = max(category_weighted_scores)
+```mermaid
+flowchart LR
+    V1["Votes in category A"] -->|"sum(trust_weight) / total_weight × 100"| S1["score_A"]
+    V2["Votes in category B"] -->|"sum(trust_weight) / total_weight × 100"| S2["score_B"]
+    V3["Votes in category ..."] -->|"sum(trust_weight) / total_weight × 100"| S3["score_..."]
+    S1 --> Max["max()"]
+    S2 --> Max
+    S3 --> Max
+    Max --> VS["video.score"]
 ```
 
 ### Thresholds
@@ -83,23 +98,29 @@ Channel scores are **automatically computed** from their videos' individual scor
 
 ### Computation
 
-```
-channel_score = (flagged_videos / total_tracked_videos) * avg_flagged_score
-
-where:
-  flagged_videos = videos with score >= 50
-  total_tracked_videos = videos with any votes (minimum 3 for stability)
-  avg_flagged_score = average score of flagged videos
+```mermaid
+flowchart TD
+    A["Gather channel videos"] --> B["flagged_videos =<br/>videos with score >= 50"]
+    A --> C["total_tracked_videos =<br/>videos with any votes (min 3)"]
+    B --> D["avg_flagged_score =<br/>average score of flagged videos"]
+    B --> E["channel_score =<br/>(flagged / total_tracked) × avg_flagged_score"]
+    C --> E
+    D --> E
 ```
 
 ### Auto-Flagging New Videos
 
 When a channel reaches the auto-flag threshold:
-```
-channel.auto_flag_new = TRUE when:
-  - channel_score >= 80 AND
-  - flagged_videos >= 20 AND
-  - channel not locked by VIP
+
+```mermaid
+flowchart TD
+    E["channel_score computed"] --> F{"channel_score >= 80?"}
+    F -->|No| G["No auto-flag"]
+    F -->|Yes| H{"flagged_videos >= 20?"}
+    H -->|No| G
+    H -->|Yes| I{"Channel locked by VIP?"}
+    I -->|Yes| G
+    I -->|No| J["auto_flag_new = TRUE<br/>New videos get preliminary score of 60%"]
 ```
 
 New videos from auto-flagged channels receive a **preliminary score of 60%** (visible to users as "likely AI") until they receive enough independent votes to establish their own score. This preliminary score can be overridden by community votes in either direction.
@@ -129,12 +150,21 @@ Channel scores are recalculated:
 
 Each category gets its own weighted score. The video's overall confidence is the **maximum** across categories:
 
-```
-For category C:
-  C_score = (sum of trust_weight for votes in C) / (sum of trust_weight for ALL votes) * 100
+```mermaid
+flowchart LR
+    CA["fully_ai votes"] -->|"Σ trust_weight / Σ all_weight × 100"| SA["fully_ai score"]
+    CB["ai_voiceover votes"] -->|"Σ trust_weight / Σ all_weight × 100"| SB["ai_voiceover score"]
+    CC["ai_visuals votes"] -->|"Σ trust_weight / Σ all_weight × 100"| SC["ai_visuals score"]
+    CD["ai_thumbnails votes"] -->|"Σ trust_weight / Σ all_weight × 100"| SD["ai_thumbnails score"]
+    CE["ai_assisted votes"] -->|"Σ trust_weight / Σ all_weight × 100"| SE["ai_assisted score"]
 
-video.score = max(C_score for all categories C with votes)
-video.primary_category = category with highest C_score
+    SA --> Max["max()"]
+    SB --> Max
+    SC --> Max
+    SD --> Max
+    SE --> Max
+    Max --> VS["video.score"]
+    Max --> PC["video.primary_category =<br/>category with highest score"]
 ```
 
 ### User-Side Filtering

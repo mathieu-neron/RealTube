@@ -5,24 +5,28 @@
 ### Client-Side (Extension)
 
 **IndexedDB** stores the local cache:
-```
-Table: flagged_videos
-  videoId (primary key)
-  score
-  categories (JSON)
-  channelId
-  lastUpdated
+```mermaid
+erDiagram
+    flagged_videos {
+        string videoId PK
+        float score
+        JSON categories
+        string channelId
+        timestamp lastUpdated
+    }
 
-Table: flagged_channels
-  channelId (primary key)
-  score
-  autoFlag
-  lastUpdated
+    flagged_channels {
+        string channelId PK
+        float score
+        boolean autoFlag
+        timestamp lastUpdated
+    }
 
-Table: pending_votes (offline queue)
-  videoId
-  category
-  timestamp
+    pending_votes {
+        string videoId
+        string category
+        timestamp timestamp
+    }
 ```
 
 **Sync Schedule:**
@@ -33,13 +37,12 @@ Table: pending_votes (offline queue)
 
 ### Server-Side (Redis)
 
-```
-Key patterns:
-  video:{videoId}          -> JSON { score, categories, channelId, locked }
-  channel:{channelId}      -> JSON { score, flaggedCount, autoFlag }
-  ratelimit:{ip}:{endpoint} -> counter with TTL
-  sync:delta:{timestamp}   -> sorted set of changed video IDs
-```
+| Key Pattern | Value | TTL |
+|-------------|-------|-----|
+| `video:{videoId}` | `JSON { score, categories, channelId, locked }` | 5 min |
+| `channel:{channelId}` | `JSON { score, flaggedCount, autoFlag }` | 15 min |
+| `ratelimit:{ip}:{endpoint}` | counter | 1 min |
+| `sync:delta:{timestamp}` | sorted set of changed video IDs | 48 hours |
 
 **TTLs:**
 - Video data: 5 minutes (frequently updated)
@@ -49,14 +52,14 @@ Key patterns:
 
 ### NGINX Proxy Cache
 
-```
-/api/videos/:hashPrefix    -> cache 5 seconds (privacy-preserving, high traffic)
-/api/channels/:channelId   -> cache 60 seconds
-/api/stats                  -> cache 5 minutes
-/api/sync/full              -> cache 1 hour
-/api/sync/delta             -> no cache (must be fresh)
-/api/votes                  -> no cache (write endpoint)
-```
+| Endpoint | Cache TTL | Notes |
+|----------|-----------|-------|
+| `/api/videos/:hashPrefix` | 5 seconds | Privacy-preserving, high traffic |
+| `/api/channels/:channelId` | 60 seconds | |
+| `/api/stats` | 5 minutes | |
+| `/api/sync/full` | 1 hour | |
+| `/api/sync/delta` | no cache | Must be fresh |
+| `/api/votes` | no cache | Write endpoint |
 
 ---
 
@@ -122,14 +125,30 @@ A background worker (in both Go and Python) listens for notifications and batche
 
 ### Cache Invalidation
 
-```
-On vote insert:
-  1. Write to PostgreSQL (source of truth)
-  2. DELETE from Redis: video:{videoId}
-  3. Next read re-populates from DB
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Backend
+    participant PG as PostgreSQL
+    participant Redis
 
-Optional: Redis PUBLISH "cache:invalidate" {videoId}
-  -> All backend instances subscribe and evict local references
+    Client->>Backend: POST /api/votes
+    Backend->>PG: INSERT vote (source of truth)
+    Backend->>Redis: DELETE video:{videoId}
+    Note over Redis: Cache invalidated
+
+    Client->>Backend: GET /api/videos/:hash
+    Backend->>Redis: GET video:{videoId}
+    Redis-->>Backend: MISS
+    Backend->>PG: SELECT video
+    PG-->>Backend: video data
+    Backend->>Redis: SET video:{videoId}
+    Backend-->>Client: video data
+
+    opt Multi-instance
+        Backend->>Redis: PUBLISH cache:invalidate {videoId}
+        Redis-->>Backend: All instances evict local references
+    end
 ```
 
 ### Consistency Model Summary
@@ -437,14 +456,14 @@ python-backend:
 
 ### Graceful Shutdown Sequence
 
-```
-1. SIGTERM received
-2. Stop accepting new connections (close listener)
-3. Wait for in-flight requests to complete (30s timeout)
-4. Flush pending score recalculations
-5. Close database connection pool
-6. Close Redis connection
-7. Exit 0
+```mermaid
+flowchart TD
+    A["SIGTERM received"] --> B["Stop accepting new connections<br/>(close listener)"]
+    B --> C["Wait for in-flight requests<br/>(30s timeout)"]
+    C --> D["Flush pending score recalculations"]
+    D --> E["Close database connection pool"]
+    E --> F["Close Redis connection"]
+    F --> G["Exit 0"]
 ```
 
 - **Go**: `signal.NotifyContext` + `server.Shutdown(ctx)`

@@ -1,5 +1,112 @@
 # SUB-DOC 5: Database Design
 
+## Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    videos ||--o{ video_categories : "has"
+    videos ||--o{ votes : "receives"
+    videos }o--|| channels : "belongs to"
+    users ||--o{ votes : "casts"
+    users ||--o{ vip_actions : "performs"
+    users ||--o{ ip_hashes : "maps to"
+    videos ||--o{ sync_cache : "cached in"
+
+    videos {
+        VARCHAR16 video_id PK
+        VARCHAR32 channel_id FK
+        TEXT title
+        FLOAT score
+        INTEGER total_votes
+        BOOLEAN locked
+        BOOLEAN hidden
+        BOOLEAN shadow_hidden
+        FLOAT video_duration
+        BOOLEAN is_short
+        TIMESTAMPTZ first_reported
+        TIMESTAMPTZ last_updated
+        VARCHAR16 service
+    }
+
+    video_categories {
+        VARCHAR16 video_id PK,FK
+        VARCHAR20 category PK
+        INTEGER vote_count
+        FLOAT weighted_score
+    }
+
+    votes {
+        BIGSERIAL id PK
+        VARCHAR16 video_id FK
+        VARCHAR64 user_id FK
+        VARCHAR20 category
+        FLOAT trust_weight
+        TIMESTAMPTZ created_at
+        VARCHAR64 ip_hash
+        VARCHAR128 user_agent
+    }
+
+    channels {
+        VARCHAR32 channel_id PK
+        TEXT channel_name
+        FLOAT score
+        INTEGER total_videos
+        INTEGER flagged_videos
+        VARCHAR20 top_category
+        BOOLEAN locked
+        BOOLEAN auto_flag_new
+        TIMESTAMPTZ last_updated
+    }
+
+    users {
+        VARCHAR64 user_id PK
+        FLOAT trust_score
+        FLOAT accuracy_rate
+        INTEGER total_votes
+        INTEGER accurate_votes
+        TIMESTAMPTZ first_seen
+        TIMESTAMPTZ last_active
+        BOOLEAN is_vip
+        BOOLEAN is_shadowbanned
+        TEXT ban_reason
+        VARCHAR64 username
+    }
+
+    vip_actions {
+        BIGSERIAL id PK
+        VARCHAR64 vip_user_id FK
+        VARCHAR32 action_type
+        VARCHAR16 target_type
+        VARCHAR64 target_id
+        TEXT reason
+        TIMESTAMPTZ created_at
+    }
+
+    ip_hashes {
+        VARCHAR64 ip_hash PK
+        VARCHAR64 user_id FK
+        TIMESTAMPTZ last_seen
+        INTEGER vote_count_24h
+        BOOLEAN rate_limited
+    }
+
+    sync_cache {
+        BIGSERIAL id PK
+        VARCHAR16 video_id
+        FLOAT score
+        JSONB categories
+        VARCHAR32 channel_id
+        VARCHAR8 action
+        TIMESTAMPTZ changed_at
+    }
+
+    full_cache_blob {
+        SERIAL id PK
+        BYTEA blob_data
+        TIMESTAMPTZ generated_at
+    }
+```
+
 ## 8. Database Schema
 
 ```sql

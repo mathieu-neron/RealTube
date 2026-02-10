@@ -19,13 +19,14 @@ The content script is the core of the extension. It injects into YouTube pages a
 - Use MutationObserver to catch dynamically loaded content (infinite scroll)
 
 **DOM Manipulation Targets:**
-```
-Feed page:       ytd-rich-item-renderer, ytd-video-renderer
-Search results:  ytd-video-renderer
-Watch sidebar:   ytd-compact-video-renderer
-Shorts:          ytd-reel-video-renderer
-Channel page:    ytd-grid-video-renderer
-```
+
+| Page Type | DOM Selectors |
+|-----------|---------------|
+| Feed page | `ytd-rich-item-renderer`, `ytd-video-renderer` |
+| Search results | `ytd-video-renderer` |
+| Watch sidebar | `ytd-compact-video-renderer` |
+| Shorts | `ytd-reel-video-renderer` |
+| Channel page | `ytd-grid-video-renderer` |
 
 **Vote Submission UI:**
 - Inject a RealTube button into the video player controls (similar to SponsorBlock)
@@ -123,14 +124,15 @@ Channel page:    ytd-grid-video-renderer
 
 ### Cache-First Architecture
 
-```
-Page loads -> content script fires
-  -> Extract video IDs from DOM (batch ~50 IDs)
-  -> Check IndexedDB local cache (sync, <5ms)
-  -> Cache hits: hide immediately (no network delay)
-  -> Cache misses: send to background worker (async)
-    -> Background checks API via hash-prefix lookup
-    -> Results arrive -> hide late-resolved videos
+```mermaid
+flowchart TD
+    A["Page loads"] --> B["Content script fires"]
+    B --> C["Extract video IDs from DOM<br/>(batch ~50 IDs)"]
+    C --> D["Check IndexedDB local cache<br/>(sync, &lt;5ms)"]
+    D -->|Cache hits| E["Hide immediately<br/>(no network delay)"]
+    D -->|Cache misses| F["Send to background worker<br/>(async)"]
+    F --> G["Background checks API<br/>via hash-prefix lookup"]
+    G --> H["Results arrive →<br/>hide late-resolved videos"]
 ```
 
 ### MutationObserver Strategy

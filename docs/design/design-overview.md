@@ -91,33 +91,27 @@ RealTube is a crowdsourced browser extension that lets the community flag AI-gen
 
 ## 3. System Architecture Overview
 
-```
-                         USERS (Browsers)
-                              |
-            +--------+--------+--------+--------+
-            |        |        |        |        |
-         Chrome   Firefox   Safari    Edge    Third-party
-            |        |        |        |        clients
-            +--------+--------+--------+--------+
-                              |
-                      [ NGINX Reverse Proxy ]
-                       (rate limiting, cache)
-                              |
-                    +---------+---------+
-                    |                   |
-             [ Go Backend ]    [ Python Backend ]
-              (Fiber)           (FastAPI)
-              Primary           Secondary / ML
-                    |                   |
-                    +---------+---------+
-                              |
-                    +---------+---------+
-                    |                   |
-              [ PostgreSQL ]      [ Redis Cache ]
-              (primary DB)        (hot data cache)
-                    |
-              [ DB Export ]
-              (pg_dump / rsync)
+```mermaid
+graph TD
+    subgraph Browsers
+        Chrome
+        Firefox
+        Safari
+        Edge
+        Third["Third-party clients"]
+    end
+
+    Browsers -->|HTTPS| NGINX["NGINX Reverse Proxy<br/>(rate limiting, cache)"]
+
+    NGINX --> Go["Go Backend<br/>(Fiber) — Primary"]
+    NGINX --> Python["Python Backend<br/>(FastAPI) — Secondary / ML"]
+
+    Go --> PG["PostgreSQL<br/>(primary DB)"]
+    Go --> Redis["Redis Cache<br/>(hot data cache)"]
+    Python --> PG
+    Python --> Redis
+
+    PG --> Export["DB Export<br/>(pg_dump / rsync)"]
 ```
 
 ### Component Responsibilities
